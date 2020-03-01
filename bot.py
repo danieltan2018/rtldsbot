@@ -179,6 +179,7 @@ def main():
     dp.add_handler(CommandHandler("admin", admin))
     dp.add_handler(CallbackQueryHandler(callbackquery))
 
+    webserver()
     updater.start_polling(1)
 
     print("Bot is running. Press Ctrl+C to stop.")
