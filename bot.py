@@ -5,8 +5,7 @@ from telegram.ext import (Updater, CommandHandler,
                           Filters, CallbackQueryHandler)
 from telegram.ext.dispatcher import run_async
 # Dependency: pip install flask requests
-from flask import Flask, request
-import json
+from flask import Flask, request, jsonify
 import subprocess
 import re
 from collections import OrderedDict
@@ -140,7 +139,7 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def index():
     if request.method == 'POST':
-        x = request.get_json(force=True)
+        x = jsonify(request.get_json(force=True))
         x = x['Message']
         print(x)
         compose = ''
