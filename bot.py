@@ -140,9 +140,8 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def index():
     if request.method == 'POST':
-        x = request.get_json(force=True)
+        x = jsonify(request.get_json(force=True))
         x = x['Message']
-        print(x)
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
         compose += '<b>Notification Type: </b>' + \
