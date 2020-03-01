@@ -6,6 +6,7 @@ from telegram.ext import (Updater, CommandHandler,
 from telegram.ext.dispatcher import run_async
 # Dependency: pip install flask requests
 from flask import Flask, request
+import json
 import subprocess
 import re
 from collections import OrderedDict
