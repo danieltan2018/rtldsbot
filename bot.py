@@ -125,6 +125,7 @@ def callbackquery(update, context):
         kill(context)
     if data == 'log':
         log(context)
+    context.bot.answer_callback_query(query.id)
 
 
 @run_async
