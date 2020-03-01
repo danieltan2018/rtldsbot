@@ -97,7 +97,7 @@ def log(context):
     viewercount = len(viewers)
     allviewercount = len(allviewers)
     finallog = '=== {} TOTAL VIEWERS ===\n\n'.format(allviewercount) + finallog
-    finallog += '\n=== {} CURRENTLY VIEWING: ===\n'.format(viewercount)
+    finallog += '\n=== {} CURRENTLY VIEWING ===\n'.format(viewercount)
     if viewercount > 0:
         for item in viewers:
             finallog += item + '\n'
@@ -141,8 +141,8 @@ app = Flask(__name__)
 def index():
     if request.method == 'POST':
         x = request.get_json(force=True)
-        #print(json.dumps(x, indent=4))
         x = x['Message']
+        print(json.dumps(x, indent=4))
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
         compose += '<b>Notification Type: </b>' + \
