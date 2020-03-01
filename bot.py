@@ -142,7 +142,7 @@ def index():
     if request.method == 'POST':
         x = request.get_json(force=True)
         x = x['Message']
-        print(json.dumps(x, indent=4))
+        print(x)
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
         compose += '<b>Notification Type: </b>' + \
@@ -167,7 +167,6 @@ def index():
                 x['complaintFeedbackType'] + ' - ' + x['userAgent'] + '\n'
         except:
             pass
-
         bot.send_message(chat_id=group, text=compose,
                          parse_mode=telegram.ParseMode.HTML, disable_web_page_preview=True)
         return '{"success":"true"}', 200
