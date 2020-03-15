@@ -58,7 +58,7 @@ def kill(context):
 @run_async
 def log(context):
     timestamp_regex = re.compile('\[.*\+')
-    email_regex = re.compile('\?.*\sH')
+    email_regex = re.compile('\?.*\sHTTP/')
     logstore = OrderedDict()
 
     with open('/var/log/nginx/access.log', 'r') as logfile:
@@ -71,7 +71,8 @@ def log(context):
                 if timestamp not in logstore:
                     logstore[timestamp] = set()
                 email = email_regex.search(line).group()
-                email = email.strip('?H ')
+                email = email.strip('? ')
+                email = email.replace(' HTTP/', '')
                 if ' 404 ' in line:
                     email += ' ERROR'
                 logstore[timestamp].add(email)
