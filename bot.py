@@ -11,7 +11,7 @@ import re
 from collections import OrderedDict
 from datetime import datetime
 # Ensure secrets.py exists
-from secrets import rtsp_address, rtmp_address, group, bottoken
+from secrets import rtsp1, rtsp2, rtmp1, rtmp2, group, bottoken
 
 bot = telegram.Bot(token=bottoken)
 
@@ -20,11 +20,17 @@ def admin(update, context):
     msg = '*LIVE STREAMING*\nAdmin Control Panel'
     keyboard = [
         [InlineKeyboardButton(
-            "Start Stream", callback_data='stream')],
+            "Start Stream (Sanctuary)", callback_data='stream1')],
         [InlineKeyboardButton(
-            "Stop Stream", callback_data='kill')],
+            "Stop Stream (Sanctuary)", callback_data='kill1')],
         [InlineKeyboardButton(
-            "View Today's Log", callback_data='log')]
+            "Start Stream (MPH)", callback_data='stream2')],
+        [InlineKeyboardButton(
+            "Stop Stream (MPH)", callback_data='kill2')],
+        [InlineKeyboardButton(
+            "View Log (English Svc)", callback_data='englog')],
+        [InlineKeyboardButton(
+            "View Log (Chinese Svc)", callback_data='chilog')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
@@ -32,36 +38,72 @@ def admin(update, context):
 
 
 @run_async
-def stream(context):
-    global process
+def stream1():
+    global process1
     bot.send_message(chat_id=group,
-                     text='_Starting RTSP stream..._', parse_mode=telegram.ParseMode.MARKDOWN)
-    process = subprocess.Popen(['ffmpeg', '-i', rtsp_address, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp_address],
-                               stdout=subprocess.PIPE,
-                               universal_newlines=True)
-    for output in process.stdout.readlines():
-        print(output.strip())
-    bot.send_message(chat_id=group, text='*RTSP Stream Disconnected*',
+                     text='_Starting stream from Sanctuary..._', parse_mode=telegram.ParseMode.MARKDOWN)
+    process1 = subprocess.Popen(['ffmpeg', '-i', rtsp1, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp1],
+                                stdout=subprocess.PIPE,
+                                universal_newlines=True)
+    monitor = True
+    for output in process1.stdout.readlines():
+        if monitor and 'speed=' in output:
+            bot.send_message(chat_id=group, text='*Sanctuary stream connected*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+            monitor = False
+            print(output.strip())
+    bot.send_message(chat_id=group, text='*Sanctuary stream disconnected*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
 
 
 @run_async
-def kill(context):
-    process.kill()
-    process.wait()
+def kill1():
+    global process1
     bot.send_message(chat_id=group,
-                     text='*RTSP Stream Killed*', parse_mode=telegram.ParseMode.MARKDOWN)
+                     text='_Stopping stream from Sanctuary..._', parse_mode=telegram.ParseMode.MARKDOWN)
+    process1.kill()
+    process1.wait()
     return
 
 
 @run_async
-def log(context):
+def stream2():
+    global process2
+    bot.send_message(chat_id=group,
+                     text='_Starting stream from MPH..._', parse_mode=telegram.ParseMode.MARKDOWN)
+    process2 = subprocess.Popen(['ffmpeg', '-i', rtsp2, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp2],
+                                stdout=subprocess.PIPE,
+                                universal_newlines=True)
+    monitor = True
+    for output in process2.stdout.readlines():
+        if monitor and 'speed=' in output:
+            bot.send_message(chat_id=group, text='*MPH stream connected*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+            monitor = False
+            print(output.strip())
+    bot.send_message(chat_id=group, text='*MPH stream disconnected*',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    return
+
+
+@run_async
+def kill2():
+    global process2
+    bot.send_message(chat_id=group,
+                     text='_Stopping stream from MPH..._', parse_mode=telegram.ParseMode.MARKDOWN)
+    process2.kill()
+    process2.wait()
+    return
+
+
+@run_async
+def log(logname, logpath):
     timestamp_regex = re.compile('\[.*\+')
     email_regex = re.compile('\?.*\sHTTP/')
     logstore = OrderedDict()
 
-    with open('/var/log/nginx/access.log', 'r') as logfile:
+    with open(logpath, 'r') as logfile:
         for line in logfile:
             if 'GET /live.m3u8?' in line:
                 line = line.strip()
@@ -101,7 +143,8 @@ def log(context):
     if viewercount > 0:
         for item in viewers:
             finallog += item + '\n'
-    finallog += '\nLog generated at ' + str(datetime.now()).split('.')[0]
+    finallog += '\n{} Log generated at '.format(
+        logname) + str(datetime.now()).split('.')[0]
 
     logsender = finallog.split('\n')
     linecounter = 0
@@ -120,12 +163,26 @@ def log(context):
 def callbackquery(update, context):
     query = update.callback_query
     data = query.data
-    if data == 'stream':
-        stream(context)
-    if data == 'kill':
-        kill(context)
-    if data == 'log':
-        log(context)
+    first_name = query.from_user.first_name
+    last_name = query.from_user.last_name
+    full_name = (str(first_name or '') + ' ' + str(last_name or '')).strip()
+    bot.send_message(chat_id=group, text='`Bot is responding to command by {}`'.format(
+        full_name), parse_mode=telegram.ParseMode.MARKDOWN)
+    if data == 'stream1':
+        stream1()
+    elif data == 'kill1':
+        kill1()
+    elif data == 'stream2':
+        bot.send_message(
+            chat_id=group, text='This feature is not implemented yet!')
+    elif data == 'kill2':
+        bot.send_message(
+            chat_id=group, text='This feature is not implemented yet!')
+    elif data == 'englog':
+        log('English Service', '/var/log/nginx/access.log')
+    elif data == 'chilog':
+        bot.send_message(
+            chat_id=group, text='This feature is not implemented yet!')
     context.bot.answer_callback_query(query.id)
 
 
