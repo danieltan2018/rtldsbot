@@ -51,7 +51,11 @@ def stream1():
             bot.send_message(chat_id=group, text='*Sanctuary stream connected*',
                              parse_mode=telegram.ParseMode.MARKDOWN)
             monitor = False
-            print(output.strip())
+        elif 'failed' in output:
+            bot.send_message(chat_id=group, text='*Sanctuary stream connection failure*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+            return
+        print(output.strip())
     bot.send_message(chat_id=group, text='*Sanctuary stream disconnected*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
@@ -81,7 +85,11 @@ def stream2():
             bot.send_message(chat_id=group, text='*MPH stream connected*',
                              parse_mode=telegram.ParseMode.MARKDOWN)
             monitor = False
-            print(output.strip())
+        elif 'failed' in output:
+            bot.send_message(chat_id=group, text='*MPH stream connection failure*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+            return
+        print(output.strip())
     bot.send_message(chat_id=group, text='*MPH stream disconnected*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
