@@ -43,19 +43,21 @@ def stream1():
     bot.send_message(chat_id=group,
                      text='_Starting stream from Sanctuary..._', parse_mode=telegram.ParseMode.MARKDOWN)
     process1 = subprocess.Popen(['ffmpeg', '-i', rtsp1, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp1],
-                                stdout=subprocess.PIPE,
-                                universal_newlines=True)
+                                stderr=subprocess.PIPE, universal_newlines=True)
     monitor = True
-    for output in process1.stdout.readlines():
-        if monitor and 'speed=' in output:
-            bot.send_message(chat_id=group, text='*Sanctuary stream connected*',
-                             parse_mode=telegram.ParseMode.MARKDOWN)
-            monitor = False
-        elif 'failed' in output:
-            bot.send_message(chat_id=group, text='*Sanctuary stream connection failure*',
-                             parse_mode=telegram.ParseMode.MARKDOWN)
-            return
-        print(output.strip())
+    while True:
+        output = process1.stderr.readline()
+        if output == '' and process1.poll() is not None:
+            break
+        if output:
+            if monitor and 'speed=' in output:
+                bot.send_message(chat_id=group, text='*Sanctuary stream connected*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                monitor = False
+            elif 'failed' in output or 'error' in output:
+                bot.send_message(chat_id=group, text='*Sanctuary stream connection failure*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                return
     bot.send_message(chat_id=group, text='*Sanctuary stream disconnected*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
@@ -77,19 +79,21 @@ def stream2():
     bot.send_message(chat_id=group,
                      text='_Starting stream from MPH..._', parse_mode=telegram.ParseMode.MARKDOWN)
     process2 = subprocess.Popen(['ffmpeg', '-i', rtsp2, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp2],
-                                stdout=subprocess.PIPE,
-                                universal_newlines=True)
+                                stderr=subprocess.PIPE, universal_newlines=True)
     monitor = True
-    for output in process2.stdout.readlines():
-        if monitor and 'speed=' in output:
-            bot.send_message(chat_id=group, text='*MPH stream connected*',
-                             parse_mode=telegram.ParseMode.MARKDOWN)
-            monitor = False
-        elif 'failed' in output:
-            bot.send_message(chat_id=group, text='*MPH stream connection failure*',
-                             parse_mode=telegram.ParseMode.MARKDOWN)
-            return
-        print(output.strip())
+    while True:
+        output = process2.stderr.readline()
+        if output == '' and process2.poll() is not None:
+            break
+        if output:
+            if monitor and 'speed=' in output:
+                bot.send_message(chat_id=group, text='*MPH stream connected*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                monitor = False
+            elif 'failed' in output or 'error' in output:
+                bot.send_message(chat_id=group, text='*MPH stream connection failure*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                return
     bot.send_message(chat_id=group, text='*MPH stream disconnected*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
@@ -181,11 +185,9 @@ def callbackquery(update, context):
     elif data == 'kill1':
         kill1()
     elif data == 'stream2':
-        bot.send_message(
-            chat_id=group, text='This feature is not implemented yet!')
+        stream2()
     elif data == 'kill2':
-        bot.send_message(
-            chat_id=group, text='This feature is not implemented yet!')
+        kill2()
     elif data == 'englog':
         log('English Service', '/var/log/nginx/access.log')
     elif data == 'chilog':
