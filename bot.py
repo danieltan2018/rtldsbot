@@ -173,8 +173,7 @@ def log(logname, logsearch):
                 finallog += timestamp + ' ' + email + ' EXIT\n'
                 lastseen[email] = timestamp
 
-    prelog = '=== {} TOTAL VIEWERS ===\n\n'.format(len(firstseen))
-    prelog += 'SUMMARY:\n'
+    prelog = '=== {} TOTAL VIEWERS ===\n'.format(len(firstseen))
     for item in firstseen:
         if item in lastseen:
             prelog += item + ' '
