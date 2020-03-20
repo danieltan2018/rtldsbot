@@ -119,6 +119,8 @@ def log(logname, logsearch):
     currtime = ''
     ratecounter = {}
     ratewarnings = set()
+    firstseen = {}
+    lastseen = {}
 
     with open('/var/log/nginx/access.log', 'r') as logfile:
         for line in logfile:
@@ -155,36 +157,44 @@ def log(logname, logsearch):
 
     finallog = ''
     viewers = set()
-    allviewers = set()
     for timestamp, emailset in logstore.items():
         for email in emailset:
             if email not in viewers:
                 viewers.add(email)
                 if 'ERROR' not in email:
                     finallog += timestamp + ' ' + email + ' PLAY\n'
-                    allviewers.add(email)
+                    if email not in firstseen:
+                        firstseen[email] = timestamp
 
         currentviewers = viewers.copy()
         for email in currentviewers:
             if email not in emailset:
                 viewers.remove(email)
                 finallog += timestamp + ' ' + email + ' EXIT\n'
+                lastseen[email] = timestamp
 
     viewercount = len(viewers)
-    allviewercount = len(allviewers)
-    finallog = '=== {} TOTAL VIEWERS ===\n\n'.format(allviewercount) + finallog
-    finallog += '\n=== {} CURRENTLY VIEWING ===\n'.format(viewercount)
+    allviewercount = len(firstseen)
+    prelog = '=== {} TOTAL VIEWERS ===\n\n'.format(allviewercount)
+    prelog += 'SUMMARY:\n'
+    for item in firstseen:
+        if item in lastseen:
+            prelog = item
+            prelog += firstseen[item] + ' - ' + lastseen[item] + '\n'
+    prelog += '\n=== {} CURRENTLY VIEWING ===\n'.format(viewercount)
     if viewercount > 0:
         for item in viewers:
             finallog += item + '\n'
-    finallog += '\n'
-    finallog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
+    prelog += '\n'
+    prelog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
     for item in ratewarnings:
-        finallog += item + '\n'
-    finallog += '\n'
-    finallog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
+        prelog += item + '\n'
+    prelog += '\n'
+    prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
     for item in ipwarnings:
-        finallog += item + '\n'
+        prelog += item + '\n'
+    prelog += '\n' + '=== FULL LOG ===\n'
+    finallog = prelog + finallog
     finallog += '\n{} Log generated at '.format(
         logname) + str(datetime.now()).split('.')[0]
 
