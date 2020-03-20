@@ -110,14 +110,19 @@ def kill2():
 
 
 @run_async
-def log(logname, logpath):
+def log(logname, logsearch):
     timestamp_regex = re.compile('\[.*\+')
     email_regex = re.compile('\?.*\sHTTP/')
     logstore = OrderedDict()
+    ipstore = {}
+    ipwarnings = set()
+    currtime = ''
+    ratecounter = {}
+    ratewarnings = set()
 
-    with open(logpath, 'r') as logfile:
+    with open('/var/log/nginx/access.log', 'r') as logfile:
         for line in logfile:
-            if 'GET /live.m3u8?' in line:
+            if logsearch in line:
                 line = line.strip()
                 timestamp = timestamp_regex.search(line).group()
                 timestamp = timestamp.strip('[+')
@@ -130,6 +135,23 @@ def log(logname, logpath):
                 if ' 404 ' in line:
                     email += ' ERROR'
                 logstore[timestamp].add(email)
+                ip = line[:15]
+                if email not in ipstore:
+                    ipstore[email] = ip
+                else:
+                    if ipstore[email] != ip:
+                        ipwarnings.add(email)
+                if timestamp != currtime:
+                    currtime = timestamp
+                    for email in ratecounter:
+                        if ratecounter[email] > 31:
+                            ratewarnings.add(email)
+                    ratecounter = {}
+                else:
+                    if email not in ratecounter:
+                        ratecounter[email] = 0
+                    else:
+                        ratecounter[email] = ratecounter[email] + 1
 
     finallog = ''
     viewers = set()
@@ -155,6 +177,14 @@ def log(logname, logpath):
     if viewercount > 0:
         for item in viewers:
             finallog += item + '\n'
+    finallog += '\n'
+    finallog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
+    for item in ratewarnings:
+        finallog += item + '\n'
+    finallog += '\n'
+    finallog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
+    for item in ipwarnings:
+        finallog += item + '\n'
     finallog += '\n{} Log generated at '.format(
         logname) + str(datetime.now()).split('.')[0]
 
@@ -189,7 +219,7 @@ def callbackquery(update, context):
     elif data == 'kill2':
         kill2()
     elif data == 'englog':
-        log('English Service', '/var/log/nginx/access.log')
+        log('English Service', 'GET /live.m3u8?')
     elif data == 'chilog':
         bot.send_message(
             chat_id=group, text='This feature is not implemented yet!')
