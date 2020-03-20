@@ -122,13 +122,13 @@ def log(logname, logsearch):
 
     with open('/var/log/nginx/access.log', 'r') as logfile:
         for line in logfile:
+            line = line.strip()
+            timestamp = timestamp_regex.search(line).group()
+            timestamp = timestamp.strip('[+')
+            timestamp = timestamp[12:17]
+            if timestamp not in logstore:
+                logstore[timestamp] = set()
             if logsearch in line:
-                line = line.strip()
-                timestamp = timestamp_regex.search(line).group()
-                timestamp = timestamp.strip('[+')
-                timestamp = timestamp[12:17]
-                if timestamp not in logstore:
-                    logstore[timestamp] = set()
                 email = email_regex.search(line).group()
                 email = email.strip('? ')
                 email = email.replace(' HTTP/', '')
