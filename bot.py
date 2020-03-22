@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify
 import subprocess
 import re
 from collections import OrderedDict
+import time
 from datetime import datetime
 # Ensure secrets.py exists
 from secrets import rtsp1, rtsp2, rtmp1, rtmp2, group, bottoken
@@ -204,6 +205,7 @@ def log(logname, logsearch):
         if linecounter == 50:
             bot.send_message(
                 chat_id=group, text=compose)
+            time.sleep(0.1)
             linecounter = 0
             compose = ''
     bot.send_message(chat_id=group, text=compose)
@@ -248,7 +250,7 @@ def index():
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
         compose += '<b>Notification Type: </b>' + \
-            x['notificationType'] + '\n\n'
+            x['notificationType'] + '\n'
         for y in x['mail']['commonHeaders']['to']:
             compose += '<b>To: </b>' + y + '\n'
         compose += '<b>Subject: </b>' + x['mail']['commonHeaders']['subject']
