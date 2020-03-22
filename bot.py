@@ -205,7 +205,7 @@ def log(logname, logsearch):
         if linecounter == 50:
             bot.send_message(
                 chat_id=group, text=compose)
-            time.sleep(0.1)
+            time.sleep(1)
             linecounter = 0
             compose = ''
     bot.send_message(chat_id=group, text=compose)
