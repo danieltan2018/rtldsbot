@@ -32,7 +32,7 @@ def admin(update, context):
 
 @run_async
 def liveon():
-    process = subprocess.Popen(['aws', 'start-channel', '--channel-id', '9981981'],
+    process = subprocess.Popen(['aws', 'medialive', 'start-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
     for output in process.stdout.readlines():
         print(output.strip())
@@ -43,7 +43,7 @@ def liveon():
 
 @run_async
 def liveoff():
-    process = subprocess.Popen(['aws', 'stop-channel', '--channel-id', '9981981'],
+    process = subprocess.Popen(['aws', 'medialive', 'stop-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
     for output in process.stdout.readlines():
         print(output.strip())
