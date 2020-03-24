@@ -46,9 +46,8 @@ def liveoff():
     process = subprocess.Popen(['aws', 'medialive', 'stop-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
     for output in process.stdout.readlines():
-        print(output.strip())
-    bot.send_message(chat_id=group, text='*MediaLive Channel is stopping*',
-                     parse_mode=telegram.ParseMode.MARKDOWN)
+        print('Test', output.strip())
+    #bot.send_message(chat_id=group, text='*MediaLive Channel is stopping*', parse_mode=telegram.ParseMode.MARKDOWN)
     return
 
 
