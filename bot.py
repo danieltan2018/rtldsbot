@@ -21,17 +21,9 @@ def admin(update, context):
     msg = '*LIVE STREAMING*\nAdmin Control Panel'
     keyboard = [
         [InlineKeyboardButton(
-            "Start Stream (Sanctuary)", callback_data='stream1')],
+            "Start MediaLive", callback_data='liveon')],
         [InlineKeyboardButton(
-            "Stop Stream (Sanctuary)", callback_data='kill1')],
-        [InlineKeyboardButton(
-            "Start Stream (MPH)", callback_data='stream2')],
-        [InlineKeyboardButton(
-            "Stop Stream (MPH)", callback_data='kill2')],
-        [InlineKeyboardButton(
-            "View Log (English Svc)", callback_data='englog')],
-        [InlineKeyboardButton(
-            "View Log (Chinese Svc)", callback_data='chilog')]
+            "Stop MediaLive", callback_data='liveoff')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
@@ -39,176 +31,21 @@ def admin(update, context):
 
 
 @run_async
-def stream1():
-    global process1
-    bot.send_message(chat_id=group,
-                     text='_Starting stream from Sanctuary..._', parse_mode=telegram.ParseMode.MARKDOWN)
-    process1 = subprocess.Popen(['ffmpeg', '-i', rtsp1, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp1],
-                                stderr=subprocess.PIPE, universal_newlines=True)
-    monitor = True
-    while True:
-        output = process1.stderr.readline()
-        if output == '' and process1.poll() is not None:
-            break
-        if output:
-            if monitor and 'speed=' in output:
-                bot.send_message(chat_id=group, text='*Sanctuary stream connected*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                monitor = False
-            elif 'failed' in output or 'error' in output:
-                bot.send_message(chat_id=group, text='*Sanctuary stream connection failure*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                return
-    bot.send_message(chat_id=group, text='*Sanctuary stream disconnected*',
+def liveon():
+    process = subprocess.Popen(['aws', 'start-channel', '--channel-id', 9981981],
+                               stdout=subprocess.PIPE, universal_newlines=True)
+    bot.send_message(chat_id=group, text='*MediaLive Channel is starting*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
 
 
 @run_async
-def kill1():
-    global process1
-    bot.send_message(chat_id=group,
-                     text='_Stopping stream from Sanctuary..._', parse_mode=telegram.ParseMode.MARKDOWN)
-    process1.kill()
-    process1.wait()
-    return
-
-
-@run_async
-def stream2():
-    global process2
-    bot.send_message(chat_id=group,
-                     text='_Starting stream from MPH..._', parse_mode=telegram.ParseMode.MARKDOWN)
-    process2 = subprocess.Popen(['ffmpeg', '-i', rtsp2, '-vcodec', 'copy', '-acodec', 'copy', '-f', 'flv', rtmp2],
-                                stderr=subprocess.PIPE, universal_newlines=True)
-    monitor = True
-    while True:
-        output = process2.stderr.readline()
-        if output == '' and process2.poll() is not None:
-            break
-        if output:
-            if monitor and 'speed=' in output:
-                bot.send_message(chat_id=group, text='*MPH stream connected*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                monitor = False
-            elif 'failed' in output or 'error' in output:
-                bot.send_message(chat_id=group, text='*MPH stream connection failure*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                return
-    bot.send_message(chat_id=group, text='*MPH stream disconnected*',
+def liveoff():
+    process = subprocess.Popen(['aws', 'stop-channel', '--channel-id', 9981981],
+                               stdout=subprocess.PIPE, universal_newlines=True)
+    bot.send_message(chat_id=group, text='*MediaLive Channel is stopping*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
-
-
-@run_async
-def kill2():
-    global process2
-    bot.send_message(chat_id=group,
-                     text='_Stopping stream from MPH..._', parse_mode=telegram.ParseMode.MARKDOWN)
-    process2.kill()
-    process2.wait()
-    return
-
-
-@run_async
-def log(logname, logsearch):
-    timestamp_regex = re.compile('\[.*\+')
-    email_regex = re.compile('\?.*\sHTTP/')
-    logstore = OrderedDict()
-    ipstore = {}
-    ipwarnings = set()
-    currtime = ''
-    ratecounter = {}
-    ratewarnings = set()
-    firstseen = {}
-    lastseen = {}
-
-    with open('/var/log/nginx/access.log', 'r') as logfile:
-        for line in logfile:
-            line = line.strip()
-            timestamp = timestamp_regex.search(line).group()
-            timestamp = timestamp.strip('[+')
-            timestamp = timestamp[12:17]
-            if timestamp not in logstore:
-                logstore[timestamp] = set()
-            if logsearch in line:
-                email = email_regex.search(line).group()
-                email = email.strip('? ')
-                email = email.replace(' HTTP/', '')
-                if ' 404 ' in line:
-                    email += ' ERROR'
-                logstore[timestamp].add(email)
-                ip = line[:15]
-                if email not in ipstore:
-                    ipstore[email] = ip
-                else:
-                    if ipstore[email] != ip:
-                        ipwarnings.add(email)
-                if timestamp != currtime:
-                    currtime = timestamp
-                    for email in ratecounter:
-                        if ratecounter[email] > 31:
-                            ratewarnings.add(email)
-                    ratecounter = {}
-                else:
-                    if email not in ratecounter:
-                        ratecounter[email] = 0
-                    else:
-                        ratecounter[email] = ratecounter[email] + 1
-
-    finallog = ''
-    viewers = set()
-    for timestamp, emailset in logstore.items():
-        for email in emailset:
-            if email not in viewers:
-                viewers.add(email)
-                if 'ERROR' not in email:
-                    finallog += timestamp + ' ' + email + ' PLAY\n'
-                    if email not in firstseen:
-                        firstseen[email] = timestamp
-
-        currentviewers = viewers.copy()
-        for email in currentviewers:
-            if email not in emailset:
-                viewers.remove(email)
-                finallog += timestamp + ' ' + email + ' EXIT\n'
-                lastseen[email] = timestamp
-
-    prelog = '=== {} TOTAL VIEWERS ===\n'.format(len(firstseen))
-    for item in firstseen:
-        if item in lastseen:
-            prelog += item + ' '
-            prelog += firstseen[item] + ' - ' + lastseen[item] + '\n'
-    prelog += '\n=== {} CURRENTLY VIEWING ===\n'.format(len(viewers))
-    if len(viewers) > 0:
-        for item in viewers:
-            finallog += item + '\n'
-    prelog += '\n'
-    prelog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
-    for item in ratewarnings:
-        prelog += item + '\n'
-    prelog += '\n'
-    prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
-    for item in ipwarnings:
-        prelog += item + '\n'
-    prelog += '\n' + '=== FULL LOG ===\n'
-    finallog = prelog + finallog
-    finallog += '\n{} Log generated at '.format(
-        logname) + str(datetime.now()).split('.')[0]
-
-    logsender = finallog.split('\n')
-    linecounter = 0
-    compose = ''
-    for line in logsender:
-        compose += line + '\n'
-        linecounter += 1
-        if linecounter == 50:
-            bot.send_message(
-                chat_id=group, text=compose)
-            time.sleep(1)
-            linecounter = 0
-            compose = ''
-    bot.send_message(chat_id=group, text=compose)
 
 
 def callbackquery(update, context):
@@ -219,19 +56,10 @@ def callbackquery(update, context):
     full_name = (str(first_name or '') + ' ' + str(last_name or '')).strip()
     bot.send_message(chat_id=group, text='`Bot is responding to command by {}`'.format(
         full_name), parse_mode=telegram.ParseMode.MARKDOWN)
-    if data == 'stream1':
-        stream1()
-    elif data == 'kill1':
-        kill1()
-    elif data == 'stream2':
-        stream2()
-    elif data == 'kill2':
-        kill2()
-    elif data == 'englog':
-        log('English Service', 'GET /live.m3u8?')
-    elif data == 'chilog':
-        bot.send_message(
-            chat_id=group, text='This feature is not implemented yet!')
+    if data == 'liveon':
+        liveon()
+    elif data == 'liveoff':
+        liveoff()
     context.bot.answer_callback_query(query.id)
 
 
