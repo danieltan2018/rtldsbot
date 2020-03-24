@@ -34,10 +34,17 @@ def admin(update, context):
 def liveon():
     process = subprocess.Popen(['aws', 'medialive', 'start-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
-    for output in process.stdout.readlines():
-        print(output.strip())
-    bot.send_message(chat_id=group, text='*MediaLive Channel is starting*',
+    bot.send_message(chat_id=group, text='_Starting MediaLive channel..._',
                      parse_mode=telegram.ParseMode.MARKDOWN)
+    while True:
+        testprocess = subprocess.Popen(['aws', 'medialive', 'list-channels'],
+                                       stdout=subprocess.PIPE, universal_newlines=True)
+        for output in testprocess.stdout.readlines():
+            if '"State": "RUNNING"' in output:
+                bot.send_message(chat_id=group, text='*MediaLive ON*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+        time.sleep(10)
     return
 
 
@@ -45,9 +52,17 @@ def liveon():
 def liveoff():
     process = subprocess.Popen(['aws', 'medialive', 'stop-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
-    for output in process.stdout.readlines():
-        print('Test', output.strip())
-    #bot.send_message(chat_id=group, text='*MediaLive Channel is stopping*', parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.send_message(chat_id=group, text='_Stopping MediaLive channel..._',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    while True:
+        testprocess = subprocess.Popen(['aws', 'medialive', 'list-channels'],
+                                       stdout=subprocess.PIPE, universal_newlines=True)
+        for output in testprocess.stdout.readlines():
+            if '"State": "IDLE"' in output:
+                bot.send_message(chat_id=group, text='*MediaLive OFF*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+        time.sleep(10)
     return
 
 
@@ -119,7 +134,6 @@ def main():
     updater.start_polling(1)
 
     print("Bot is running. Press Ctrl+C to stop.")
-    liveoff() # TEST ONLY
     updater.idle()
     print("Bot stopped successfully.")
 
