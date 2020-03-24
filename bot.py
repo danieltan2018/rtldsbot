@@ -34,6 +34,8 @@ def admin(update, context):
 def liveon():
     process = subprocess.Popen(['aws', 'start-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
+    for output in process.stdout.readlines():
+        print(output.strip())
     bot.send_message(chat_id=group, text='*MediaLive Channel is starting*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
@@ -43,6 +45,8 @@ def liveon():
 def liveoff():
     process = subprocess.Popen(['aws', 'stop-channel', '--channel-id', '9981981'],
                                stdout=subprocess.PIPE, universal_newlines=True)
+    for output in process.stdout.readlines():
+        print(output.strip())
     bot.send_message(chat_id=group, text='*MediaLive Channel is stopping*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     return
@@ -116,6 +120,7 @@ def main():
     updater.start_polling(1)
 
     print("Bot is running. Press Ctrl+C to stop.")
+    liveoff() # TEST ONLY
     updater.idle()
     print("Bot stopped successfully.")
 
