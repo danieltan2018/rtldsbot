@@ -1,5 +1,5 @@
 import re
-email_regex = re.compile('"args":".*@[a-zA-Z0-9]*.[a-zA-Z0-9]*"')
+email_regex = re.compile('"args":".*","http')
 
 allusers = set()
 logs = ['log1.txt', 'log2.txt', 'log3.txt', 'log4.txt', 'log5.txt']
@@ -9,8 +9,10 @@ for log in logs:
         for line in logfile:
             try:
                 email = email_regex.search(line).group()
+                email = email.split(',')[0]
                 email = email.replace('"args":"', '')
                 email = email.strip('"')
+                email = email.split('&')[0]
                 allusers.add(email)
             except:
                 pass
