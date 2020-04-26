@@ -9,7 +9,7 @@ for log in logs:
     with open(log, 'r') as logfile:
         for line in logfile:
             try:
-                if 'index_1.m3u8' in line:
+                if '.m3u8' in line:
                     email = email_regex.search(line).group()
                     email = email.split(',')[0]
                     email = email.replace('"args":"', '')
@@ -23,5 +23,6 @@ for log in logs:
             except:
                 pass
 
+print(len(allusers))
 for user in allusers:
     print(user, counter[user]/10)

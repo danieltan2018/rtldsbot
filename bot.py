@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (Updater, CommandHandler,
                           Filters, CallbackQueryHandler)
 from telegram.ext.dispatcher import run_async
-# Dependency: pip install flask requests
+# Dependency: pip install flask
 from flask import Flask, request, jsonify
 import subprocess
 import re
@@ -123,17 +123,15 @@ def index():
 
 
 def main():
-    updater = Updater(
-        token=bottoken, use_context=True)
+    updater = Updater(token=bottoken, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("admin", admin))
     dp.add_handler(CallbackQueryHandler(callbackquery))
 
-    webserver()
     updater.start_polling(1)
-
     print("Bot is running. Press Ctrl+C to stop.")
+    webserver()
     updater.idle()
     print("Bot stopped successfully.")
 
