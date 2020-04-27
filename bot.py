@@ -51,6 +51,7 @@ def stream1():
     monitor = True
     while True:
         output = process1.stderr.readline()
+        print(output)
         if output == '' and process1.poll() is not None:
             break
         if output:
@@ -69,7 +70,7 @@ def stream1():
 def kill1():
     try:
         global kill1confirm
-        killconfirm += 1
+        kill1confirm += 1
     except:
         bot.send_message(chat_id=group, text='_Unable to stop: stream is not running._',
                          parse_mode=telegram.ParseMode.MARKDOWN)
@@ -93,6 +94,7 @@ def download():
     bot.send_message(chat_id=group, text='_Downloading svc file..._',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     for output in process.stdout.readlines():
+        print(output)
         if 'download:' in output:
             bot.send_message(chat_id=group, text='*Download Complete*',
                                 parse_mode=telegram.ParseMode.MARKDOWN)
