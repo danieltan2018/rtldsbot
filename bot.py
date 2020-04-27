@@ -58,7 +58,6 @@ def stream1():
                 bot.send_message(chat_id=group, text='*Playback Started*',
                                  parse_mode=telegram.ParseMode.MARKDOWN)
                 monitor = False
-                return
     bot.send_message(chat_id=group, text='*Playback Stopped*',
                      parse_mode=telegram.ParseMode.MARKDOWN)
     del kill1confirm
