@@ -210,7 +210,7 @@ def log():
     prelog += '\n=== {} CURRENTLY VIEWING ===\n'.format(len(viewers))
     if len(viewers) > 0:
         for item in viewers:
-            finallog += item + '\n'
+            prelog += item + '\n'
     prelog += '\n'
     prelog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
     for item in ratewarnings:
