@@ -6,13 +6,14 @@ from telegram.ext import (Updater, CommandHandler,
 from telegram.ext.dispatcher import run_async
 # Dependency: pip install flask
 from flask import Flask, request, jsonify
+import schedule
 import subprocess
 import re
 from collections import OrderedDict
 import time
 from datetime import datetime
 # Ensure secrets.py exists
-from secrets import rtsp1, rtsp2, rtmp1, rtmp2, group, bottoken
+from secrets import rtmp1, svcfile, group, bottoken
 
 bot = telegram.Bot(token=bottoken)
 
@@ -23,6 +24,12 @@ def admin(update, context):
         [InlineKeyboardButton(
             "View Log", callback_data='log')],
         [InlineKeyboardButton(
+            "Start Stream (Recording)", callback_data='stream1')],
+        [InlineKeyboardButton(
+            "Stop Stream (Recording)", callback_data='kill1')],
+        [InlineKeyboardButton(
+            "Download Recording", callback_data='download')],
+        [InlineKeyboardButton(
             "Start MediaLive (OLD)", callback_data='liveon')],
         [InlineKeyboardButton(
             "Stop MediaLive (OLD)", callback_data='liveoff')]
@@ -30,6 +37,66 @@ def admin(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
         chat_id=group, reply_markup=reply_markup, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+@run_async
+def stream1():
+    global kill1confirm
+    kill1confirm = 0
+    global process1
+    bot.send_message(chat_id=group,
+                     text='_Starting stream from file..._', parse_mode=telegram.ParseMode.MARKDOWN)
+    process1 = subprocess.Popen(['ffmpeg', '-re', '-i', 'svc.mp4', '-c', 'copy', '-f', 'flv', rtmp1],
+                                stderr=subprocess.PIPE, universal_newlines=True)
+    monitor = True
+    while True:
+        output = process1.stderr.readline()
+        if output == '' and process1.poll() is not None:
+            break
+        if output:
+            if monitor and 'speed=' in output:
+                bot.send_message(chat_id=group, text='*Playback Started*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                monitor = False
+                return
+    bot.send_message(chat_id=group, text='*Playback Stopped*',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    del kill1confirm
+    return
+
+
+@run_async
+def kill1():
+    try:
+        global kill1confirm
+        killconfirm += 1
+    except:
+        bot.send_message(chat_id=group, text='_Unable to stop: stream is not running._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+    if killconfirm % 2 == 0:
+        global process1
+        bot.send_message(chat_id=group, text='_Stopping stream..._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
+        process1.kill()
+        process1.wait()
+    else:
+        bot.send_message(chat_id=group,
+                         text='_Please press Stop Stream again to confirm._', parse_mode=telegram.ParseMode.MARKDOWN)
+    return
+
+
+@run_async
+def download():
+    process = subprocess.Popen(
+        ['aws', 's3', 'cp', svcfile, './'], stdout=subprocess.PIPE, universal_newlines=True)
+    bot.send_message(chat_id=group, text='_Downloading svc file..._',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    for output in process.stdout.readlines():
+        if 'download:' in output:
+            bot.send_message(chat_id=group, text='*Download Complete*',
+                                parse_mode=telegram.ParseMode.MARKDOWN)
+    return
 
 
 @run_async
@@ -71,7 +138,7 @@ def liveoff():
 @run_async
 def log():
     logname = 'English Service'
-    logsearch = '.m3u8'
+    logsearch = 'live/live.m3u8'
     timestamp_regex = re.compile('\[.*\+')
     email_regex = re.compile('\?.*\sHTTP/')
     logstore = OrderedDict()
@@ -231,6 +298,17 @@ def index():
         return '{"success":"true"}', 200
 
 
+@run_async
+def scheduler():
+    schedule.every().saturday.at("20:00").do(download)
+    schedule.every().sunday.at("07:50").do(stream1)
+    schedule.every().sunday.at("10:50").do(stream1)
+    print("Tasks scheduled.")
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+
+
 def main():
     updater = Updater(token=bottoken, use_context=True)
     dp = updater.dispatcher
@@ -240,6 +318,7 @@ def main():
 
     updater.start_polling(1)
     print("Bot is running. Press Ctrl+C to stop.")
+    scheduler()
     webserver()
     updater.idle()
     print("Bot stopped successfully.")
