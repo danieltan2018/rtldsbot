@@ -12,8 +12,8 @@ import re
 from collections import OrderedDict
 import time
 from datetime import datetime
-# Ensure secrets.py exists
-from secrets import rtmp1, svcfile, group, bottoken
+# Ensure secret.py exists
+from secret import rtmp1, svcfile, group, bottoken
 
 bot = telegram.Bot(token=bottoken)
 
