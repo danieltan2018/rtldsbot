@@ -138,7 +138,7 @@ def liveoff():
 @run_async
 def log():
     logname = 'English Service'
-    logsearch = 'live/live.m3u8'
+    logsearch = 'live/live.m3u8?'
     timestamp_regex = re.compile('\[.*\+')
     email_regex = re.compile('\?.*\sHTTP/')
     logstore = OrderedDict()
