@@ -207,6 +207,9 @@ def log():
         if item in lastseen:
             prelog += item + ' '
             prelog += firstseen[item] + ' - ' + lastseen[item] + '\n'
+        else:
+            prelog += item + ' '
+            prelog += firstseen[item] + ' - ' + 'now' + '\n'
     prelog += '\n=== {} CURRENTLY VIEWING ===\n'.format(len(viewers))
     if len(viewers) > 0:
         for item in viewers:
