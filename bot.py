@@ -21,9 +21,11 @@ def admin(update, context):
     msg = '*LIVE STREAMING*\nAdmin Control Panel'
     keyboard = [
         [InlineKeyboardButton(
-            "Start MediaLive", callback_data='liveon')],
+            "View Log", callback_data='log')],
         [InlineKeyboardButton(
-            "Stop MediaLive", callback_data='liveoff')]
+            "Start MediaLive (OLD)", callback_data='liveon')],
+        [InlineKeyboardButton(
+            "Stop MediaLive (OLD)", callback_data='liveoff')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
@@ -66,6 +68,112 @@ def liveoff():
     return
 
 
+@run_async
+def log():
+    logname = 'English Service'
+    logsearch = '.m3u8'
+    timestamp_regex = re.compile('\[.*\+')
+    email_regex = re.compile('\?.*\sHTTP/')
+    logstore = OrderedDict()
+    ipstore = {}
+    ipwarnings = set()
+    currtime = ''
+    ratecounter = {}
+    ratewarnings = set()
+    firstseen = {}
+    lastseen = {}
+
+    with open('/var/log/nginx/access.log', 'r') as logfile:
+        for line in logfile:
+            line = line.strip()
+            timestamp = timestamp_regex.search(line).group()
+            timestamp = timestamp.strip('[+')
+            timestamp = timestamp[12:17]
+            if timestamp not in logstore:
+                logstore[timestamp] = set()
+            if logsearch in line:
+                email = email_regex.search(line).group()
+                email = email.strip('? ')
+                email = email.replace(' HTTP/', '')
+                if ' 404 ' in line:
+                    email += ' ERROR'
+                logstore[timestamp].add(email)
+                lineparts = line.split('"')
+                finder = lineparts.index('Amazon CloudFront')
+                ip = lineparts[finder+2]
+                if email not in ipstore:
+                    ipstore[email] = ip
+                else:
+                    if ipstore[email] != ip:
+                        ipwarnings.add(email)
+                if timestamp != currtime:
+                    currtime = timestamp
+                    for email in ratecounter:
+                        if ratecounter[email] > 25:
+                            ratewarnings.add(email)
+                    ratecounter = {}
+                else:
+                    if email not in ratecounter:
+                        ratecounter[email] = 0
+                    else:
+                        ratecounter[email] = ratecounter[email] + 1
+
+    finallog = ''
+    viewers = set()
+    for timestamp, emailset in logstore.items():
+        for email in emailset:
+            if email not in viewers:
+                viewers.add(email)
+                if 'ERROR' not in email:
+                    finallog += timestamp + ' ' + email + ' PLAY\n'
+                    if email not in firstseen:
+                        firstseen[email] = timestamp
+
+        currentviewers = viewers.copy()
+        for email in currentviewers:
+            if email not in emailset:
+                viewers.remove(email)
+                finallog += timestamp + ' ' + email + ' EXIT\n'
+                lastseen[email] = timestamp
+
+    prelog = '=== {} TOTAL VIEWERS ===\n'.format(len(firstseen))
+    for item in firstseen:
+        if item in lastseen:
+            prelog += item + ' '
+            prelog += firstseen[item] + ' - ' + lastseen[item] + '\n'
+    prelog += '\n=== {} CURRENTLY VIEWING ===\n'.format(len(viewers))
+    if len(viewers) > 0:
+        for item in viewers:
+            finallog += item + '\n'
+    prelog += '\n'
+    prelog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
+    for item in ratewarnings:
+        prelog += item + '\n'
+    prelog += '\n'
+    prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
+    for item in ipwarnings:
+        prelog += item + '\n'
+    prelog += '\n' + '=== FULL LOG DISABLED ===\n'
+    # finallog = prelog + finallog
+    finallog = prelog
+    finallog += '\n{} Log generated at '.format(
+        logname) + str(datetime.now()).split('.')[0]
+
+    logsender = finallog.split('\n')
+    linecounter = 0
+    compose = ''
+    for line in logsender:
+        compose += line + '\n'
+        linecounter += 1
+        if linecounter == 50:
+            bot.send_message(
+                chat_id=group, text=compose)
+            time.sleep(1)
+            linecounter = 0
+            compose = ''
+    bot.send_message(chat_id=group, text=compose)
+
+
 def callbackquery(update, context):
     query = update.callback_query
     data = query.data
@@ -78,6 +186,8 @@ def callbackquery(update, context):
         liveon()
     elif data == 'liveoff':
         liveoff()
+    elif data == 'log':
+        log()
     context.bot.answer_callback_query(query.id)
 
 
@@ -95,8 +205,7 @@ def index():
         x = request.get_json(force=True)
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
-        compose += '<b>Notification Type: </b>' + \
-            x['notificationType'] + '\n'
+        compose += '<b>Notification Type: </b>' + x['notificationType'] + '\n'
         for y in x['mail']['commonHeaders']['to']:
             compose += '<b>To: </b>' + y + '\n'
         compose += '<b>Subject: </b>' + x['mail']['commonHeaders']['subject']
