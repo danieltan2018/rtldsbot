@@ -249,12 +249,18 @@ def callbackquery(update, context):
     full_name = (str(first_name or '') + ' ' + str(last_name or '')).strip()
     bot.send_message(chat_id=group, text='`Bot is responding to command by {}`'.format(
         full_name), parse_mode=telegram.ParseMode.MARKDOWN)
-    if data == 'liveon':
+    if data == 'log':
+        log()
+    elif data == 'stream1':
+        stream1()
+    elif data == 'kill1':
+        kill1()
+    elif data == 'download':
+        download()
+    elif data == 'liveon':
         liveon()
     elif data == 'liveoff':
         liveoff()
-    elif data == 'log':
-        log()
     context.bot.answer_callback_query(query.id)
 
 
@@ -301,8 +307,8 @@ def index():
 @run_async
 def scheduler():
     schedule.every().saturday.at("20:00").do(download)
-    schedule.every().sunday.at("07:50").do(stream1)
-    schedule.every().sunday.at("10:50").do(stream1)
+    schedule.every().sunday.at("07:48").do(stream1)
+    schedule.every().sunday.at("10:48").do(stream1)
     print("Tasks scheduled.")
     while True:
         schedule.run_pending()
