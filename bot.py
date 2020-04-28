@@ -311,10 +311,16 @@ def scheduler():
     schedule.every().saturday.at("20:00").do(download)
     schedule.every().sunday.at("07:48").do(stream1)
     schedule.every().sunday.at("10:48").do(stream1)
+
+    # TEST BLOCK
+    schedule.every().tuesday.at("18:30").do(download)
+    schedule.every().tuesday.at("18:48").do(stream1)
+    schedule.every().tuesday.at("21:48").do(stream1)
+
     print("Tasks scheduled.")
     while True:
         schedule.run_pending()
-        time.sleep(30)
+        time.sleep(5)
 
 
 def main():
