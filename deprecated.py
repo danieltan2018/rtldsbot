@@ -236,6 +236,42 @@ def callbackquery(update, context):
 
 
 @run_async
+def liveon():
+    process = subprocess.Popen(['aws', 'medialive', 'start-channel', '--channel-id', '9981981'],
+                               stdout=subprocess.PIPE, universal_newlines=True)
+    bot.send_message(chat_id=group, text='_Starting MediaLive channel..._',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    while True:
+        testprocess = subprocess.Popen(['aws', 'medialive', 'list-channels'],
+                                       stdout=subprocess.PIPE, universal_newlines=True)
+        for output in testprocess.stdout.readlines():
+            if '"State": "RUNNING"' in output:
+                bot.send_message(chat_id=group, text='*MediaLive ON*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+        time.sleep(10)
+    return
+
+
+@run_async
+def liveoff():
+    process = subprocess.Popen(['aws', 'medialive', 'stop-channel', '--channel-id', '9981981'],
+                               stdout=subprocess.PIPE, universal_newlines=True)
+    bot.send_message(chat_id=group, text='_Stopping MediaLive channel..._',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    while True:
+        testprocess = subprocess.Popen(['aws', 'medialive', 'list-channels'],
+                                       stdout=subprocess.PIPE, universal_newlines=True)
+        for output in testprocess.stdout.readlines():
+            if '"State": "IDLE"' in output:
+                bot.send_message(chat_id=group, text='*MediaLive OFF*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                return
+        time.sleep(10)
+    return
+
+
+@run_async
 def webserver():
     app.run(host='0.0.0.0', port=8000, threaded=True)
 

@@ -28,12 +28,7 @@ def admin(update, context):
         [InlineKeyboardButton(
             "Stop Stream (Recording)", callback_data='kill1')],
         [InlineKeyboardButton(
-            "Download Recording", callback_data='download')],
-        [InlineKeyboardButton(
-            "Start MediaLive (OLD)", callback_data='liveon')],
-        [InlineKeyboardButton(
-            "Stop MediaLive (OLD)", callback_data='liveoff')]
-    ]
+            "Download Recording", callback_data='download')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
         chat_id=group, reply_markup=reply_markup, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
@@ -95,42 +90,6 @@ def download():
         if 'download:' in output:
             bot.send_message(chat_id=group, text='*Download Complete*',
                              parse_mode=telegram.ParseMode.MARKDOWN)
-    return
-
-
-@run_async
-def liveon():
-    process = subprocess.Popen(['aws', 'medialive', 'start-channel', '--channel-id', '9981981'],
-                               stdout=subprocess.PIPE, universal_newlines=True)
-    bot.send_message(chat_id=group, text='_Starting MediaLive channel..._',
-                     parse_mode=telegram.ParseMode.MARKDOWN)
-    while True:
-        testprocess = subprocess.Popen(['aws', 'medialive', 'list-channels'],
-                                       stdout=subprocess.PIPE, universal_newlines=True)
-        for output in testprocess.stdout.readlines():
-            if '"State": "RUNNING"' in output:
-                bot.send_message(chat_id=group, text='*MediaLive ON*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                return
-        time.sleep(10)
-    return
-
-
-@run_async
-def liveoff():
-    process = subprocess.Popen(['aws', 'medialive', 'stop-channel', '--channel-id', '9981981'],
-                               stdout=subprocess.PIPE, universal_newlines=True)
-    bot.send_message(chat_id=group, text='_Stopping MediaLive channel..._',
-                     parse_mode=telegram.ParseMode.MARKDOWN)
-    while True:
-        testprocess = subprocess.Popen(['aws', 'medialive', 'list-channels'],
-                                       stdout=subprocess.PIPE, universal_newlines=True)
-        for output in testprocess.stdout.readlines():
-            if '"State": "IDLE"' in output:
-                bot.send_message(chat_id=group, text='*MediaLive OFF*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                return
-        time.sleep(10)
     return
 
 
@@ -259,10 +218,9 @@ def callbackquery(update, context):
         kill1()
     elif data == 'download':
         download()
-    elif data == 'liveon':
-        liveon()
-    elif data == 'liveoff':
-        liveoff()
+    else:
+        bot.send_message(chat_id=group, text='`That is an invalid command!`',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
     context.bot.answer_callback_query(query.id)
 
 
