@@ -216,10 +216,10 @@ def latestcount():
                                       database=dbdata)
         cursor = connection.cursor()
         cursor.execute("SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path=CONCAT('/api/content/event/', (SELECT MAX(id) FROM events WHERE category_id=55), '/mediaentrylist')) AS x")
-        eventclicks = cursor.fetchone()
+        eventclicks = cursor.fetchone()[0]
         cursor.execute(
             "SELECT name FROM events WHERE category_id=55 ORDER BY id DESC LIMIT 1")
-        eventname = cursor.fetchone()
+        eventname = cursor.fetchone()[0]
         bot.send_message(chat_id=group, text="Clicks on *{}*: {}".format(
             eventname, eventclicks), parse_mode=telegram.ParseMode.MARKDOWN)
 
