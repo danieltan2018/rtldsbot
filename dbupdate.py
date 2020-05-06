@@ -50,7 +50,7 @@ def release():
         bot.send_message(chat_id=group, text="_Releasing Worship Service Recording..._",
                          parse_mode=telegram.ParseMode.MARKDOWN)
         sql_update_query = """UPDATE events SET category_id = %s WHERE category_id = %s"""
-        cursor.execute(sql_update_query, ('57', '55'))
+        cursor.execute(sql_update_query, ('55', '57'))
         connection.commit()
         bot.send_message(chat_id=group, text="*Updated*",
                          parse_mode=telegram.ParseMode.MARKDOWN)
