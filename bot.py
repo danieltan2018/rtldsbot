@@ -12,8 +12,10 @@ import re
 from collections import OrderedDict
 import time
 from datetime import datetime
+# Dependency: pip install psycopg2-binary
+import psycopg2
 # Ensure secret.py exists
-from secret import rtmp1, svcfile, group, bottoken
+from secret import rtmp1, svcfile, group, bottoken, dbuser, dbpass, dbhost, dbport, dbdata
 
 bot = telegram.Bot(token=bottoken)
 
@@ -23,6 +25,8 @@ def admin(update, context):
     keyboard = [
         [InlineKeyboardButton(
             "View Log", callback_data='log')],
+        [InlineKeyboardButton(
+            "Recording Viewer Count", callback_data='latestcount')],
         [InlineKeyboardButton(
             "Start Stream (Recording)", callback_data='stream1')],
         [InlineKeyboardButton(
@@ -202,6 +206,32 @@ def log():
     bot.send_message(chat_id=group, text=compose)
 
 
+@run_async
+def latestcount():
+    try:
+        connection = psycopg2.connect(user=dbuser,
+                                      password=dbpass,
+                                      host=dbhost,
+                                      port=dbport,
+                                      database=dbdata)
+        cursor = connection.cursor()
+        cursor.execute("SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path=CONCAT('/api/content/event/', (SELECT MAX(id) FROM events WHERE category_id=55), '/mediaentrylist')) AS x")
+        eventclicks = cursor.fetchone()
+        cursor.execute(
+            "SELECT name FROM events WHERE category_id=55 ORDER BY id DESC LIMIT 1")
+        eventname = cursor.fetchone()
+        bot.send_message(chat_id=group, text="Clicks on *{}*: {}".format(
+            eventname, eventclicks), parse_mode=telegram.ParseMode.MARKDOWN)
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()
+
+
 def callbackquery(update, context):
     query = update.callback_query
     data = query.data
@@ -218,6 +248,8 @@ def callbackquery(update, context):
         kill1()
     elif data == 'download':
         download()
+    elif data == 'latestcount':
+        latestcount()
     else:
         bot.send_message(chat_id=group, text='`That is an invalid command!`',
                          parse_mode=telegram.ParseMode.MARKDOWN)
@@ -267,12 +299,12 @@ def index():
 @run_async
 def scheduler():
     schedule.every().saturday.at("20:00").do(download)
-    schedule.every().sunday.at("07:48").do(stream1)
-    schedule.every().sunday.at("10:48").do(stream1)
+    schedule.every().sunday.at("07:47:30").do(stream1)
+    schedule.every().sunday.at("10:47:30").do(stream1)
     print("Tasks scheduled.")
     while True:
         schedule.run_pending()
-        time.sleep(5)
+        time.sleep(1)
 
 
 def main():
