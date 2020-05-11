@@ -105,7 +105,7 @@ def log():
     email_regex = re.compile('\?.*\sHTTP/')
     logstore = OrderedDict()
     ipstore = {}
-    ipwarnings = set()
+    ipwarnings = {}
     currtime = ''
     ratecounter = {}
     ratewarnings = set()
