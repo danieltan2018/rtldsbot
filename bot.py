@@ -186,7 +186,7 @@ def log():
         prelog += item + '\n'
     prelog += '\n'
     prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
-    for key, value in ipwarnings:
+    for key, value in ipwarnings.items():
         prelog += key + ': ' + value + ' IPs\n'
     prelog += '\n' + '=== FULL LOG DISABLED ===\n'
     # finallog = prelog + finallog
