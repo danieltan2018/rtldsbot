@@ -131,11 +131,12 @@ def log():
                 finder = lineparts.index('Amazon CloudFront')
                 ip = lineparts[finder+2]
                 if email not in ipstore:
-                    ipstore[email] = ip
+                    ipstore[email] = [ip]
                 else:
-                    if ipstore[email] != ip:
+                    if ip not in ipstore[email]:
+                        ipstore[email].append(ip)
                         if email not in ipwarnings:
-                            ipwarnings[email] = 1
+                            ipwarnings[email] = 2
                         else:
                             ipwarnings[email] = ipwarnings[email] + 1
                 if timestamp != currtime:
