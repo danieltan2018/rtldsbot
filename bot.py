@@ -270,7 +270,7 @@ def bsmwarning():
                 compose += '\n' + name
                 ipcount = len(iplist[date][name])
                 if ipcount > 1:
-                    compose += ' ({} IPs)'
+                    compose += ' ({} IPs)'.format(ipcount)
 
         sender = compose.split('\n')
         linecounter = 0
