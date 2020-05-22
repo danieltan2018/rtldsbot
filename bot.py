@@ -260,7 +260,7 @@ def bsmwarning():
             if date not in iplist:
                 iplist[date] = {}
             if name not in iplist[date]:
-                iplist[date][name] = {}
+                iplist[date][name] = set()
             iplist[date][name].add(ip)
         compose = '=== BIBLE SEMINAR LOG ==='
         compose += '\nNote: Day starts at 8AM SGT'
