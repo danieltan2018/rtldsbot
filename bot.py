@@ -253,8 +253,8 @@ def bsmwarning():
         rows = cursor.fetchall()
         iplist = {}
         for row in rows:
-            date = str(date)
-            date = row[0].split()[0]
+            fulldate = str(row[0])
+            date = fulldate.split()[0]
             name = row[1]
             ip = row[2]
             if date not in iplist:
