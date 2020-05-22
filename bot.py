@@ -253,6 +253,7 @@ def bsmwarning():
         rows = cursor.fetchall()
         iplist = {}
         for row in rows:
+            date = str(date)
             date = row[0].split()[0]
             name = row[1]
             ip = row[2]
@@ -262,6 +263,7 @@ def bsmwarning():
                 iplist[date][name] = []
             iplist[date][name].append(ip)
         compose = '=== BIBLE SEMINAR LOG ==='
+        compose += '\nNote: Day starts at 8AM SGT'
         for date in iplist:
             compose += '\n\n' + date
             for name in iplist[date]:
