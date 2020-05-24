@@ -245,7 +245,6 @@ def bsmwarning():
     bsmlogs('VIDEOS', 76)
 
 
-@run_async
 def bsmlogs(logname, category):
     try:
         connection = psycopg2.connect(user=dbuser,
@@ -267,7 +266,7 @@ def bsmlogs(logname, category):
             if name not in iplist[date]:
                 iplist[date][name] = set()
             iplist[date][name].add(ip)
-        compose = '=== BIBLE SEMINAR LOG ({})==='.format(logname)
+        compose = '=== BIBLE SEMINAR LOG ({}) ==='.format(logname)
         compose += '\nNote: Day starts at 8AM SGT'
         for date in iplist:
             compose += '\n\n' + date
