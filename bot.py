@@ -254,7 +254,7 @@ def bsmlogs(logname, category):
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        cursor.execute("SELECT user_activities.created_at, preferred_name, ip_address FROM users, user_activities WHERE users.id = user_id AND path = '/api/content/category/%s'", (category))
+        cursor.execute("SELECT user_activities.created_at, preferred_name, ip_address FROM users, user_activities WHERE users.id = user_id AND path = '/api/content/category/%s'", (category,))
         rows = cursor.fetchall()
         iplist = {}
         for row in rows:
