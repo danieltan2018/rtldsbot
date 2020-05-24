@@ -241,6 +241,12 @@ def latestcount():
 
 @run_async
 def bsmwarning():
+    bsmlogs('MESSAGES', 75)
+    bsmlogs('VIDEOS', 76)
+
+
+@run_async
+def bsmlogs(logname, category):
     try:
         connection = psycopg2.connect(user=dbuser,
                                       password=dbpass,
@@ -248,8 +254,7 @@ def bsmwarning():
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        cursor.execute(
-            "SELECT user_activities.created_at, preferred_name, ip_address FROM users, user_activities WHERE users.id = user_id AND path = '/api/content/category/75'")
+        cursor.execute("SELECT user_activities.created_at, preferred_name, ip_address FROM users, user_activities WHERE users.id = user_id AND path = '/api/content/category/%s'", (category))
         rows = cursor.fetchall()
         iplist = {}
         for row in rows:
@@ -262,7 +267,7 @@ def bsmwarning():
             if name not in iplist[date]:
                 iplist[date][name] = set()
             iplist[date][name].add(ip)
-        compose = '=== BIBLE SEMINAR LOG ==='
+        compose = '=== BIBLE SEMINAR LOG ({})==='.format(logname)
         compose += '\nNote: Day starts at 8AM SGT'
         for date in iplist:
             compose += '\n\n' + date
