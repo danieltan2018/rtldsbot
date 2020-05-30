@@ -256,9 +256,13 @@ def bsmlogs(logname, category):
         cursor.execute("SELECT user_activities.created_at, preferred_name, ip_address FROM users, user_activities WHERE users.id = user_id AND path = '/api/content/category/%s'", (category,))
         rows = cursor.fetchall()
         iplist = {}
+        date1 = '2020-05-25'
+        date2 = '2020-05-25'
         for row in rows:
             fulldate = str(row[0])
             date = fulldate.split()[0]
+            date1 = date2
+            date2 = date
             name = row[1]
             ip = row[2]
             if date not in iplist:
@@ -268,7 +272,8 @@ def bsmlogs(logname, category):
             iplist[date][name].add(ip)
         compose = '=== BIBLE SEMINAR LOG ({}) ==='.format(logname)
         compose += '\nNote: Day starts at 8AM SGT'
-        for date in iplist:
+        includedate = [date1, date2]
+        for date in includedate:
             compose += '\n\n' + date
             for name in iplist[date]:
                 compose += '\n' + name
