@@ -34,7 +34,9 @@ def admin(update, context):
         [InlineKeyboardButton(
             "Download Recording", callback_data='download')],
         [InlineKeyboardButton(
-            "Bible Seminar Log", callback_data='bsmwarning')]
+            "Bible Seminar Log", callback_data='bsmwarning')],
+        [InlineKeyboardButton(
+            "Bible Seminar Views", callback_data='bsmcount')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
@@ -229,6 +231,35 @@ def latestcount():
         eventname = cursor.fetchone()[0]
         bot.send_message(chat_id=group, text="Clicks on *{}*: {}".format(
             eventname, eventclicks), parse_mode=telegram.ParseMode.MARKDOWN)
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error", error)
+
+    finally:
+        if(connection):
+            cursor.close()
+            connection.close()
+
+
+@run_async
+def bsmcount():
+    try:
+        connection = psycopg2.connect(user=dbuser,
+                                      password=dbpass,
+                                      host=dbhost,
+                                      port=dbport,
+                                      database=dbdata)
+        cursor = connection.cursor()
+        compose = '=== BIBLE SEMINAR VIEWS ===\n\n'
+        for i in range(740, 761):
+            cursor.execute(
+                "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist'", (i,))
+            eventclicks = cursor.fetchone()[0]
+            cursor.execute("SELECT name FROM events WHERE id = %s", (i,))
+            eventname = cursor.fetchone()[0]
+            compose += "{}: *{}*\n".format(eventname, eventclicks)
+        bot.send_message(chat_id=group, text=compose,
+                         parse_mode=telegram.ParseMode.MARKDOWN)
 
     except (Exception, psycopg2.Error) as error:
         print("Error", error)
