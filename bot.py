@@ -261,11 +261,11 @@ def bsmlogs(logname, category):
         for row in rows:
             fulldate = str(row[0])
             date = fulldate.split()[0]
-            date1 = date2
-            date2 = date
             name = row[1]
             ip = row[2]
             if date not in iplist:
+                date1 = date2
+                date2 = date
                 iplist[date] = {}
             if name not in iplist[date]:
                 iplist[date][name] = set()
