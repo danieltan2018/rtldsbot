@@ -355,6 +355,8 @@ def callbackquery(update, context):
         latestcount()
     elif data == 'bsmwarning':
         bsmwarning()
+    elif data == 'bsmcount':
+        bsmcount()
     else:
         bot.send_message(chat_id=group, text='`That is an invalid command!`',
                          parse_mode=telegram.ParseMode.MARKDOWN)
