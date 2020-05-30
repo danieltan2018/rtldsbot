@@ -253,7 +253,7 @@ def bsmcount():
         compose = '=== BIBLE SEMINAR VIEWS ===\n\n'
         for i in range(740, 761):
             cursor.execute(
-                "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist' AS x", (i,))
+                "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
             eventclicks = cursor.fetchone()[0]
             cursor.execute("SELECT name FROM events WHERE id = %s", (i,))
             eventname = cursor.fetchone()[0]
