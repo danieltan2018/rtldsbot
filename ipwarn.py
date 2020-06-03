@@ -2,7 +2,7 @@ import telegram.bot
 import psycopg2
 import requests
 import time
-from secret import bottoken, group, dbuser, dbpass, dbhost, dbport, dbdata
+from secret import bottoken, group, dbuser, dbpass, dbhost, dbport, dbdata, apikey
 
 bot = telegram.Bot(token=bottoken)
 
@@ -33,23 +33,22 @@ for id in iplist:
     if ipcount > 1:
         compose += '\n{} {}\n'.format(str(id), namelist[id])
         for addr in iplist[id]:
-            isp = requests.get(
-                url='http://ip-api.com/json/{}?fields=512'.format(addr)).json()['isp']
+            data = requests.get(
+                url='https://api.ipgeolocation.io/ipgeo?apiKey={}&ip={}'.format(apikey, addr)).json()
+            isp = data['isp']
+            conn = data['connection_type']
+            if conn == 'wireless':
+                isp += ' Mobile'
+            if conn == 'cable':
+                isp += ' Cable'
             compose += addr + ' ({})\n'.format(isp)
-            time.sleep(2)
 
 compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
 compose = compose.replace(
-    'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel Mobile')
-compose = compose.replace(' Singapore', '')
-compose = compose.replace(' SINGAPORE', '')
-compose = compose.replace(' PTE LTD', '')
-compose = compose.replace(' Pte Ltd', '')
-compose = compose.replace(' LIMITED', '')
-compose = compose.replace(' Limited', '')
-compose = compose.replace(' LTD', '')
-compose = compose.replace(' Ltd', '')
+    'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel')
+compose = compose.replace('Mobile-Broadband', 'M1')
+compose = compose.replace('SGCABLEVISION', 'Starhub')
 
 sender = compose.split('\n')
 linecounter = 0
