@@ -55,7 +55,6 @@ for id in iplist:
                     x_type = 'Mobile'
             x_full = '{} - {}'.format(x_isp, x_type).strip(' -')
             compose += addr + ' ({})\n'.format(x_full)
-            time.sleep(1)
 
 sender = compose.split('\n')
 linecounter = 0
