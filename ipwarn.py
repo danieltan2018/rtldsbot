@@ -6,7 +6,7 @@ from secret import bottoken, group, dbuser, dbpass, dbhost, dbport, dbdata
 
 bot = telegram.Bot(token=bottoken)
 
-compose = 'LOGIN REPORT\n\n'
+compose = 'LIFERTL LOGIN REPORT\n'
 connection = psycopg2.connect(user=dbuser,
                               password=dbpass,
                               host=dbhost,
@@ -31,7 +31,7 @@ for row in rows:
 for id in iplist:
     ipcount = len(iplist[id])
     if ipcount > 1:
-        compose += str(id) + ' ' + namelist[id] + '\n'
+        compose += '\n{} {}\n'.format(str(id), namelist[id])
         for addr in iplist[id]:
             isp = requests.get(
                 url='http://ip-api.com/json/{}?fields=512'.format(addr)).json()['isp']
