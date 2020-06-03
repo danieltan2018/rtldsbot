@@ -42,7 +42,14 @@ compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
 compose = compose.replace(
     'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel Mobile')
-
+compose = compose.replace(' Singapore', '')
+compose = compose.replace(' SINGAPORE', '')
+compose = compose.replace(' PTE LTD', '')
+compose = compose.replace(' Pte Ltd', '')
+compose = compose.replace(' LIMITED', '')
+compose = compose.replace(' Limited', '')
+compose = compose.replace(' LTD', '')
+compose = compose.replace(' Ltd', '')
 
 sender = compose.split('\n')
 linecounter = 0
