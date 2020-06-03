@@ -34,7 +34,7 @@ for id in iplist:
     if ipcount > 1:
         compose += '\n{} {}\n'.format(str(id), namelist[id])
         for addr in iplist[id]:
-            url = 'https://whatismyipaddress.com/ip/111.65.68.185'
+            url = 'https://whatismyipaddress.com/ip/{}'.format(addr)
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36"}
             resp = requests.get(url, headers=headers, timeout=5)
