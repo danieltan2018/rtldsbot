@@ -1,4 +1,5 @@
 import telegram.bot
+from bs4 import BeautifulSoup
 import psycopg2
 import requests
 import time
@@ -33,23 +34,27 @@ for id in iplist:
     if ipcount > 1:
         compose += '\n{} {}\n'.format(str(id), namelist[id])
         for addr in iplist[id]:
-            isp = requests.get(
-                url='http://ip-api.com/json/{}?fields=512'.format(addr)).json()['isp']
-            compose += addr + ' ({})\n'.format(isp)
-            time.sleep(2)
-
-compose = compose.replace(
-    'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
-compose = compose.replace(
-    'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel Mobile')
-compose = compose.replace(' Singapore', '')
-compose = compose.replace(' SINGAPORE', '')
-compose = compose.replace(' PTE LTD', '')
-compose = compose.replace(' Pte Ltd', '')
-compose = compose.replace(' LIMITED', '')
-compose = compose.replace(' Limited', '')
-compose = compose.replace(' LTD', '')
-compose = compose.replace(' Ltd', '')
+            url = 'https://whatismyipaddress.com/ip/111.65.68.185'
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36"}
+            resp = requests.get(url, headers=headers, timeout=5)
+            soup = BeautifulSoup(resp.content, "html.parser")
+            table = soup.find("table")
+            data = {}
+            rows = table.find_all('tr')
+            for row in rows:
+                k = row.find('th').get_text()
+                v = row.find('td').get_text()
+                data[k] = v
+            x_isp = data['ISP:']
+            x_type = data['Type:']
+            if x_type == 'Wireless Broadband':
+                if 'mobile' in x_isp.lower():
+                    x_type = ''
+                else:
+                    x_type = 'Mobile'
+            x_full = '{} - {}'.format(x_isp, x_type).strip(' -')
+            compose += addr + ' ({})\n'.format(x_full)
 
 sender = compose.split('\n')
 linecounter = 0
