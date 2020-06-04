@@ -2,7 +2,7 @@ import telegram.bot
 import psycopg2
 import requests
 import time
-from secret import bottoken, group, dbuser, dbpass, dbhost, dbport, dbdata, apikey
+from secret import bottoken, group, dbuser, dbpass, dbhost, dbport, dbdata, apikey, whitelist
 
 bot = telegram.Bot(token=bottoken)
 
@@ -27,7 +27,8 @@ for row in rows:
     namelist[id] = name
     if id not in iplist:
         iplist[id] = set()
-    iplist[id].add(ip)
+    if ip not in whitelist:
+        iplist[id].add(ip)
 for id in iplist:
     ipcount = len(iplist[id])
     if ipcount > 1:
@@ -37,17 +38,24 @@ for id in iplist:
                 url='https://api.ipgeolocation.io/ipgeo?apiKey={}&ip={}'.format(apikey, addr)).json()
             isp = data['isp']
             conn = data['connection_type']
+            isp = isp.replace('Mobile-Broadband', 'M1')
+            if 'M1' in isp:
+                isp = 'M1'
             if conn == 'wireless':
-                isp += ' Mobile'
+                if isp == 'M1':
+                    isp += ' Fibre'
+                else:
+                    isp += ' Mobile'
             if conn == 'cable':
                 isp += ' Cable'
+            if isp == 'M1':
+                isp += ' Mobile'
             compose += addr + ' ({})\n'.format(isp)
 
 compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
 compose = compose.replace(
     'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel')
-compose = compose.replace('Mobile-Broadband', 'M1')
 compose = compose.replace('SGCABLEVISION', 'Starhub')
 
 sender = compose.split('\n')
