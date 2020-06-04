@@ -56,7 +56,11 @@ compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
 compose = compose.replace(
     'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel')
+compose = compose.replace(
+    'Singapore Telecom Mobile Pte Ltd', 'SingTel')
 compose = compose.replace('SGCABLEVISION', 'Starhub')
+compose = compose.replace('Starhub Internet Pte Ltd', 'Starhub Mobile')
+compose = compose.replace('StarHub-Ltd-NGNBN-Services', 'Starhub Fibre')
 
 sender = compose.split('\n')
 linecounter = 0
