@@ -39,6 +39,7 @@ for id in iplist:
             isp = data['isp']
             conn = data['connection_type']
             isp = isp.replace('Mobile-Broadband', 'M1')
+            isp = isp.replace('MOBILEONELTD', 'M1')
             if 'M1' in isp:
                 isp = 'M1'
             if conn == 'wireless':
@@ -74,4 +75,5 @@ for line in sender:
         time.sleep(1)
         linecounter = 0
         message = ''
-bot.send_message(chat_id=group, text=message)
+if len(message) > 0:
+    bot.send_message(chat_id=group, text=message)
