@@ -75,5 +75,5 @@ for line in sender:
         time.sleep(1)
         linecounter = 0
         message = ''
-if len(message) > 0:
+if len(message.strip()) > 0:
     bot.send_message(chat_id=group, text=message)
