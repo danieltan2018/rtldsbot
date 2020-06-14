@@ -22,6 +22,7 @@ connection.close()
 iplist = {}
 devicelist = {}
 namelist = {}
+flags = set()
 for row in rows:
     id = row[0]
     name = row[1]
@@ -64,9 +65,10 @@ for id in iplist:
             if isp == 'M1':
                 isp += ' Mobile'
             compose += addr + ' ({})\n'.format(isp)
+            flags.add(id)
 
 for id in devicelist:
-    if id not in iplist:
+    if id not in flags:
         devicecount = len(devicelist[id])
         if devicecount > 1:
             compose += '\n{} {}\n'.format(str(id), namelist[id])
