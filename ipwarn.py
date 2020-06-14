@@ -2,6 +2,7 @@ import telegram.bot
 import psycopg2
 import requests
 import time
+import re
 from secret import bottoken, group, dbuser, dbpass, dbhost, dbport, dbdata, apikey, whitelist
 
 bot = telegram.Bot(token=bottoken)
@@ -34,6 +35,7 @@ for row in rows:
     if id not in devicelist:
         devicelist[id] = set()
     if device:
+        device = re.search(r'\(([^)]+)\)', device).group(1)
         devicelist[id].add(device)
 for id in iplist:
     ipcount = len(iplist[id])
@@ -63,7 +65,7 @@ for id in iplist:
 for id in devicelist:
     if id not in iplist:
         devicecount = len(devicelist[id])
-        if devicecount > 2:
+        if devicecount > 1:
             compose += '\n{} {}\n'.format(str(id), namelist[id])
             compose += '{} devices on 1 IP\n'.format(str(devicecount))
 
