@@ -13,26 +13,33 @@ connection = psycopg2.connect(user=dbuser,
                               port=dbport,
                               database=dbdata)
 cursor = connection.cursor()
-cursor.execute("SELECT DISTINCT user_id, preferred_name, ip_address FROM user_activities ua, users WHERE ua.created_at > NOW() - '1 week'::INTERVAL AND path = '/api/user/login' AND users.id = user_id ORDER BY user_id;")
+cursor.execute("SELECT DISTINCT user_id, preferred_name, ip_address, user_agent FROM user_activities ua, users WHERE ua.created_at > NOW() - '1 week'::INTERVAL AND path = '/api/user/login' AND users.id = user_id ORDER BY user_id;")
 rows = cursor.fetchall()
 cursor.close()
 connection.close()
 
 iplist = {}
+devicelist = {}
 namelist = {}
 for row in rows:
     id = row[0]
     name = row[1]
     ip = row[2]
+    device = row[3]
     namelist[id] = name
     if id not in iplist:
         iplist[id] = set()
     if ip not in whitelist:
         iplist[id].add(ip)
+    if id not in devicelist:
+        devicelist[id] = set()
+    if device:
+        devicelist[id].add(device)
 for id in iplist:
     ipcount = len(iplist[id])
     if ipcount > 1:
         compose += '\n{} {}\n'.format(str(id), namelist[id])
+        compose += '({} devices)\n'.format(str(len(devicelist[id])))
         for addr in iplist[id]:
             data = requests.get(
                 url='https://api.ipgeolocation.io/ipgeo?apiKey={}&ip={}'.format(apikey, addr)).json()
@@ -52,6 +59,13 @@ for id in iplist:
             if isp == 'M1':
                 isp += ' Mobile'
             compose += addr + ' ({})\n'.format(isp)
+
+for id in devicelist:
+    if id not in iplist:
+        devicecount = len(devicelist[id])
+        if devicecount > 2:
+            compose += '\n{} {}\n'.format(str(id), namelist[id])
+            compose += '{} devices on 1 IP\n'.format(str(devicecount))
 
 compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
