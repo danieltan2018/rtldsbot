@@ -41,7 +41,8 @@ for id in iplist:
     ipcount = len(iplist[id])
     if ipcount > 1:
         compose += '\n{} {}\n'.format(str(id), namelist[id])
-        compose += '({} devices)\n'.format(str(len(devicelist[id])))
+        for device in devicelist[id]:
+            compose += '{}\n'.format(device)
         for addr in iplist[id]:
             data = requests.get(
                 url='https://api.ipgeolocation.io/ipgeo?apiKey={}&ip={}'.format(apikey, addr)).json()
@@ -68,6 +69,8 @@ for id in devicelist:
         if devicecount > 1:
             compose += '\n{} {}\n'.format(str(id), namelist[id])
             compose += '{} devices on 1 IP\n'.format(str(devicecount))
+            for device in devicelist[id]:
+                compose += '{}\n'.format(device)
 
 compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
