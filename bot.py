@@ -226,7 +226,7 @@ def latestcount():
         cursor = connection.cursor()
         cursor.execute("SELECT id, date FROM events WHERE category_id=55")
         services = cursor.fetchall()
-        compose = 'WORSHIP SERVICES\n'
+        compose = 'WORSHIP SERVICES\n\n'
         for data in services:
             i = data[0]
             date = data[1].strftime('%d %b')
@@ -238,8 +238,8 @@ def latestcount():
             eventviews = cursor.fetchone()[0]
             compose += "{}: *{} views ({} users)*\n".format(date,
                                                             eventviews, eventclicks)
-            bot.send_message(chat_id=group, text=compose,
-                             parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=group, text=compose,
+                         parse_mode=telegram.ParseMode.MARKDOWN)
 
     except (Exception, psycopg2.Error) as error:
         print("Error", error)
