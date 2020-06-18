@@ -224,14 +224,22 @@ def latestcount():
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        cursor.execute("SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path=CONCAT('/api/content/event/', (SELECT MAX(id) FROM events WHERE category_id=55), '/mediaentrylist')) AS x")
-        eventclicks = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path=CONCAT('/api/content/event/', (SELECT MAX(id) FROM events WHERE category_id=55), '/mediaentrylist')) AS x")
-        eventviews = cursor.fetchone()[0]
-        cursor.execute(
-            "SELECT name FROM events WHERE category_id=55 ORDER BY id DESC LIMIT 1")
-        eventname = cursor.fetchone()[0]
-        bot.send_message(chat_id=group, text="{}: *{} views ({} users)*".format(eventname, eventviews, eventclicks), parse_mode=telegram.ParseMode.MARKDOWN)
+        cursor.execute("SELECT id, date FROM events WHERE category_id=55")
+        services = cursor.fetchall()
+        compose = 'WORSHIP SERVICES\n'
+        for data in services:
+            i = data[0]
+            date = data[1].strftime('%d %b')
+            cursor.execute(
+                "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+            eventclicks = cursor.fetchone()[0]
+            cursor.execute(
+                "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+            eventviews = cursor.fetchone()[0]
+            compose += "{}: *{} views ({} users)*\n".format(date,
+                                                            eventviews, eventclicks)
+            bot.send_message(chat_id=group, text=compose,
+                             parse_mode=telegram.ParseMode.MARKDOWN)
 
     except (Exception, psycopg2.Error) as error:
         print("Error", error)
@@ -254,13 +262,16 @@ def bsmcount():
         compose = '=== BIBLE SEMINAR VIEWS ===\n\n'
         for i in range(740, 761):
             try:
-                cursor.execute("SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+                cursor.execute(
+                    "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
                 eventclicks = cursor.fetchone()[0]
-                cursor.execute("SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+                cursor.execute(
+                    "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
                 eventviews = cursor.fetchone()[0]
                 cursor.execute("SELECT name FROM events WHERE id = %s", (i,))
                 eventname = cursor.fetchone()[0]
-                compose += "{}: *{} views ({} users)*\n".format(eventname, eventviews, eventclicks)
+                compose += "{}: *{} views ({} users)*\n".format(
+                    eventname, eventviews, eventclicks)
             except:
                 pass
         bot.send_message(chat_id=group, text=compose,
