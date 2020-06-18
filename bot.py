@@ -253,12 +253,13 @@ def bsmcount():
         compose = '=== BIBLE SEMINAR VIEWS ===\n\n'
         for i in range(740, 761):
             try:
-                cursor.execute(
-                    "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+                cursor.execute("SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
                 eventclicks = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+                eventviews = cursor.fetchone()[0]
                 cursor.execute("SELECT name FROM events WHERE id = %s", (i,))
                 eventname = cursor.fetchone()[0]
-                compose += "{}: *{}*\n".format(eventname, eventclicks)
+                compose += "{}: *{} views ({} users)*\n".format(eventname, eventviews, eventclicks)
             except:
                 pass
         bot.send_message(chat_id=group, text=compose,
