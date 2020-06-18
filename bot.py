@@ -259,7 +259,7 @@ def bsmcount():
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        compose = '=== BIBLE SEMINAR VIEWS ===\n\n'
+        compose = 'BIBLE SEMINAR\n\n'
         for i in range(740, 761):
             try:
                 cursor.execute(
