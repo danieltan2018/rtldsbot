@@ -226,11 +226,12 @@ def latestcount():
         cursor = connection.cursor()
         cursor.execute("SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path=CONCAT('/api/content/event/', (SELECT MAX(id) FROM events WHERE category_id=55), '/mediaentrylist')) AS x")
         eventclicks = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path=CONCAT('/api/content/event/', (SELECT MAX(id) FROM events WHERE category_id=55), '/mediaentrylist')) AS x")
+        eventviews = cursor.fetchone()[0]
         cursor.execute(
             "SELECT name FROM events WHERE category_id=55 ORDER BY id DESC LIMIT 1")
         eventname = cursor.fetchone()[0]
-        bot.send_message(chat_id=group, text="Clicks on *{}*: {}".format(
-            eventname, eventclicks), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=group, text="{}: *{} views ({} users)*".format(eventname, eventviews, eventclicks), parse_mode=telegram.ParseMode.MARKDOWN)
 
     except (Exception, psycopg2.Error) as error:
         print("Error", error)
