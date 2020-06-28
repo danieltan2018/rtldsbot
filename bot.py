@@ -197,8 +197,7 @@ def log():
     prelog += '\n' + '=== FULL LOG DISABLED ===\n'
     # finallog = prelog + finallog
     finallog = prelog
-    finallog += '\n{} Log generated at '.format(
-        logname) + str(datetime.now()).split('.')[0]
+    finallog += '\nLast log entry at ' + timestamp
 
     logsender = finallog.split('\n')
     linecounter = 0
