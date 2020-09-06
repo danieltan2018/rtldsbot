@@ -79,9 +79,9 @@ for id in devicelist:
 compose = compose.replace(
     'Singapore Telecommunications Ltd, Magix Services', 'SingTel Fibre')
 compose = compose.replace(
-    'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel')
+    'Singapore Telecommunications Ltd SingTel Mobile', 'SingTel Mobile')
 compose = compose.replace(
-    'Singapore Telecom Mobile Pte Ltd', 'SingTel')
+    'Singapore Telecom Mobile Pte Ltd', 'SingTel Mobile')
 compose = compose.replace('SGCABLEVISION', 'Starhub')
 compose = compose.replace('Starhub Internet Pte Ltd', 'Starhub Mobile')
 compose = compose.replace('StarHub-Ltd-NGNBN-Services', 'Starhub Fibre')
