@@ -147,7 +147,7 @@ def log():
                 if timestamp != currtime:
                     currtime = timestamp
                     for email in ratecounter:
-                        if ratecounter[email] > 25:
+                        if ratecounter[email] > 7:
                             ratewarnings.add(email)
                     ratecounter = {}
                 else:
@@ -194,6 +194,8 @@ def log():
     prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
     for key, value in ipwarnings.items():
         prelog += key + ': ' + str(value) + ' IPs\n'
+        for ipaddr in ipstore[key]:
+            prelog += ipaddr + '\n'
     prelog += '\n' + '=== FULL LOG DISABLED ===\n'
     # finallog = prelog + finallog
     finallog = prelog
