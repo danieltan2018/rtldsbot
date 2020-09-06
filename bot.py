@@ -189,7 +189,8 @@ def log():
     prelog += '\n'
     prelog += '=== RATE WARNINGS ===\nThe following users may be watching on multiple devices:\n'
     for item in ratewarnings:
-        prelog += item + '\n'
+        if 'ERROR' not in item:
+            prelog += item + '\n'
     prelog += '\n'
     prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
     for key, value in ipwarnings.items():
