@@ -83,7 +83,7 @@ compose = compose.replace(
 compose = compose.replace(
     'Singapore Telecom Mobile Pte Ltd', 'SingTel Mobile')
 compose = compose.replace('SGCABLEVISION', 'Starhub')
-compose = compose.replace('Starhub Internet Pte Ltd', 'Starhub Mobile')
+compose = compose.replace('Starhub Internet Pte Ltd', 'Starhub')
 compose = compose.replace('StarHub-Ltd-NGNBN-Services', 'Starhub Fibre')
 
 sender = compose.split('\n')
