@@ -129,7 +129,7 @@ def log():
                 email = email_regex.search(line).group()
                 email = email.strip('? ')
                 email = email.replace(' HTTP/', '')
-                if ' 404 ' in line:
+                if ' 404 ' in line or ' 215 ' in line:
                     email += ' ERROR'
                 logstore[timestamp].add(email)
                 lineparts = line.split('"')
