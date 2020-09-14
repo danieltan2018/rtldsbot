@@ -16,6 +16,8 @@ from datetime import datetime
 import psycopg2
 # Ensure secret.py exists
 from secret import rtmp1, svcfile, group, bottoken, dbuser, dbpass, dbhost, dbport, dbdata
+import gsheetsync
+import ipwarn
 
 bot = telegram.Bot(token=bottoken)
 
@@ -32,7 +34,13 @@ def admin(update, context):
         [InlineKeyboardButton(
             "Stop Stream (Recording)", callback_data='kill1')],
         [InlineKeyboardButton(
-            "Download Recording", callback_data='download')]
+            "Download Recording", callback_data='download')],
+        [InlineKeyboardButton(
+            "Login IP Report", callback_data='doipwarn')],
+        [InlineKeyboardButton(
+            "Sync Loty Database", callback_data='syncloty')],
+        [InlineKeyboardButton(
+            "Sync Life Database", callback_data='synclife')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
@@ -266,6 +274,28 @@ def callbackquery(update, context):
         download()
     elif data == 'latestcount':
         latestcount()
+    elif data == 'doipwarn':
+        ipwarn()
+    elif data == 'syncloty':
+        bot.send_message(chat_id=group, text='_Syncing Loty Database..._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
+        try:
+            gsheetsync.sync('lotydb')
+            bot.send_message(chat_id=group, text='*Sync Completed*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+        except Exception as e:
+            bot.send_message(chat_id=group, text='*Failed with error: *{}'.format(e),
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+    elif data == 'synclife':
+        bot.send_message(chat_id=group, text='_Syncing Life Database..._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
+        try:
+            gsheetsync.sync('lifedb')
+            bot.send_message(chat_id=group, text='*Sync Completed*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+        except Exception as e:
+            bot.send_message(chat_id=group, text='*Failed with error: *{}'.format(e),
+                             parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         bot.send_message(chat_id=group, text='`That is an invalid command!`',
                          parse_mode=telegram.ParseMode.MARKDOWN)
