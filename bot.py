@@ -275,7 +275,7 @@ def callbackquery(update, context):
     elif data == 'latestcount':
         latestcount()
     elif data == 'doipwarn':
-        ipwarn()
+        ipwarn.generate()
     elif data == 'syncloty':
         bot.send_message(chat_id=group, text='_Syncing Loty Database..._',
                          parse_mode=telegram.ParseMode.MARKDOWN)

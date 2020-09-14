@@ -154,17 +154,17 @@ class MediaEntry(Base):
 
 
 def sync(server):
-    engine = create_engine(dbauth)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-    SPREADSHEET_ID = gsheet
     if server == 'lotydb':
         dbauth = lotydb
     elif server == 'lifedb':
         dbauth = lifedb
     else:
         raise ValueError
+    engine = create_engine(dbauth)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    SPREADSHEET_ID = gsheet
 
     creds = None
     if os.path.exists('token.pickle'):
