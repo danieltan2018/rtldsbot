@@ -32,11 +32,7 @@ def admin(update, context):
         [InlineKeyboardButton(
             "Stop Stream (Recording)", callback_data='kill1')],
         [InlineKeyboardButton(
-            "Download Recording", callback_data='download')],
-        [InlineKeyboardButton(
-            "Bible Seminar Log", callback_data='bsmwarning')],
-        [InlineKeyboardButton(
-            "Bible Seminar Views", callback_data='bsmcount')]
+            "Download Recording", callback_data='download')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
@@ -252,107 +248,6 @@ def latestcount():
             connection.close()
 
 
-@run_async
-def bsmcount():
-    try:
-        connection = psycopg2.connect(user=dbuser,
-                                      password=dbpass,
-                                      host=dbhost,
-                                      port=dbport,
-                                      database=dbdata)
-        cursor = connection.cursor()
-        compose = 'BIBLE SEMINAR\n\n'
-        for i in range(740, 761):
-            try:
-                cursor.execute(
-                    "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
-                eventclicks = cursor.fetchone()[0]
-                cursor.execute(
-                    "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
-                eventviews = cursor.fetchone()[0]
-                cursor.execute("SELECT name FROM events WHERE id = %s", (i,))
-                eventname = cursor.fetchone()[0]
-                compose += "{}: *{} views ({} users)*\n".format(
-                    eventname, eventviews, eventclicks)
-            except:
-                pass
-        bot.send_message(chat_id=group, text=compose,
-                         parse_mode=telegram.ParseMode.MARKDOWN)
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error", error)
-
-    finally:
-        if(connection):
-            cursor.close()
-            connection.close()
-
-
-@run_async
-def bsmwarning():
-    bsmlogs('MESSAGES', 75)
-    bsmlogs('VIDEOS', 76)
-
-
-def bsmlogs(logname, category):
-    try:
-        connection = psycopg2.connect(user=dbuser,
-                                      password=dbpass,
-                                      host=dbhost,
-                                      port=dbport,
-                                      database=dbdata)
-        cursor = connection.cursor()
-        cursor.execute("SELECT user_activities.created_at, preferred_name, ip_address FROM users, user_activities WHERE users.id = user_id AND path = '/api/content/category/%s'", (category,))
-        rows = cursor.fetchall()
-        iplist = {}
-        date1 = '2020-05-25'
-        date2 = '2020-05-25'
-        for row in rows:
-            fulldate = str(row[0])
-            date = fulldate.split()[0]
-            name = row[1]
-            ip = row[2]
-            if date not in iplist:
-                date1 = date2
-                date2 = date
-                iplist[date] = {}
-            if name not in iplist[date]:
-                iplist[date][name] = set()
-            iplist[date][name].add(ip)
-        compose = '=== BIBLE SEMINAR LOG ({}) ==='.format(logname)
-        compose += '\nNote: Day starts at 8AM SGT'
-        includedate = [date1, date2]
-        for date in includedate:
-            compose += '\n\n' + date
-            for name in iplist[date]:
-                compose += '\n' + name
-                ipcount = len(iplist[date][name])
-                if ipcount > 1:
-                    compose += ' ({} IPs)'.format(ipcount)
-
-        sender = compose.split('\n')
-        linecounter = 0
-        message = ''
-        for line in sender:
-            message += line + '\n'
-            linecounter += 1
-            if linecounter == 50:
-                bot.send_message(
-                    chat_id=group, text=message)
-                time.sleep(1)
-                linecounter = 0
-                message = ''
-        bot.send_message(chat_id=group, text=message)
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error", error)
-
-    finally:
-        if(connection):
-            cursor.close()
-            connection.close()
-
-
 def callbackquery(update, context):
     query = update.callback_query
     data = query.data
@@ -371,10 +266,6 @@ def callbackquery(update, context):
         download()
     elif data == 'latestcount':
         latestcount()
-    elif data == 'bsmwarning':
-        bsmwarning()
-    elif data == 'bsmcount':
-        bsmcount()
     else:
         bot.send_message(chat_id=group, text='`That is an invalid command!`',
                          parse_mode=telegram.ParseMode.MARKDOWN)
