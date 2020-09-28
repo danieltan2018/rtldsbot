@@ -257,10 +257,10 @@ def sync(server):
                                 range='media_entries!A2:P').execute()
     values = result.get('values', [])
     for row in values:
-        if row[15] == 'f':
-            download = False
-        else:
+        if row[15] == 't':
             download = True
+        else:
+            download = False
         data = {"id": row[0], "title": row[4], "thumbnail_url": row[5], "original_filename": row[6], "encrypted_filename": row[7], "date": row[8] or None, "event_id": row[9],
                 "bucket_id": row[10], "details": row[11], "media_type_id": row[12], "author_id": row[13] or None, "index": row[14] or None, "downloadable": download}
         session.merge(MediaEntry(**data))
