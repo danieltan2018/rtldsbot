@@ -243,8 +243,7 @@ def sync(server):
         scripture_reference = None
         author_id = None
         if len(row) > 9:
-            if row[9]:
-                details = row[9]
+            details = row[9]
         if len(row) > 8:
             scripture_reference = row[8]
         if len(row) > 7:
