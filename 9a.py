@@ -30,9 +30,7 @@ with open('/var/log/nginx/access.log', 'r') as logfile:
                 if ip not in ipmap:
                     ipcount += 1
                     ipmap[ip] = ipcount
-                email = '9a User ' + str(ipmap[ip])
-                if ' 404 ' in line or ' 215 ' in line:
-                    email += ' ERROR'
+                email = 'User_' + str(ipmap[ip])
                 logstore[timestamp].add(email)
 
 
@@ -42,10 +40,9 @@ for timestamp, emailset in logstore.items():
     for email in emailset:
         if email not in viewers:
             viewers.add(email)
-            if 'ERROR' not in email:
-                finallog += timestamp + ' ' + email + ' PLAY\n'
-                if email not in firstseen:
-                    firstseen[email] = timestamp
+            finallog += timestamp + ' ' + email + ' PLAY\n'
+            if email not in firstseen:
+                firstseen[email] = timestamp
 
     currentviewers = viewers.copy()
     for email in currentviewers:
@@ -54,4 +51,13 @@ for timestamp, emailset in logstore.items():
             finallog += timestamp + ' ' + email + ' EXIT\n'
             lastseen[email] = timestamp
 
-print(finallog)
+prelog = '=== {} TOTAL 9A USERS ===\n'.format(ipcount)
+for item in firstseen:
+    if item in viewers:
+        prelog += item + ' '
+        prelog += firstseen[item] + '-' + 'now' + '\n'
+    elif item in lastseen:
+        prelog += item + ' '
+        prelog += firstseen[item] + '-' + lastseen[item] + '\n'
+
+print(prelog)
