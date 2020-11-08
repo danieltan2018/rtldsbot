@@ -75,7 +75,7 @@ for ip in ipmap:
                                       database=dbdata)
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = '%s')", (ip,))
+            "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = '%s'", (ip,))
         assoc = cursor.fetchall()
         print(ipmap[ip], end=' ')
         print(assoc)
