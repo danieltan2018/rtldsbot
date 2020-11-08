@@ -59,12 +59,12 @@ prelog = '=== {} TOTAL 9A USERS ===\n'.format(ipcount)
 for item in firstseen:
     if item in viewers:
         prelog += item + ' '
-        prelog += firstseen[item] + '-' + 'now' + '\n'
+        prelog += firstseen[item] + ' - ' + 'now' + '\n'
     elif item in lastseen:
         prelog += item + ' '
-        prelog += firstseen[item] + '-' + lastseen[item] + '\n'
+        prelog += firstseen[item] + ' - ' + lastseen[item] + '\n'
 
-print(prelog)
+prelog += '\n'
 
 for ip in ipmap:
     try:
@@ -75,10 +75,10 @@ for ip in ipmap:
                                       database=dbdata)
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = '%s'", (ip,))
+            "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = %s", (ip,))
         assoc = cursor.fetchall()
-        print(ipmap[ip], end=' ')
-        print(assoc)
+        prelog += ipmap[ip] + ' = ' + ', '.join(assoc) + '\n'
     except (Exception, psycopg2.Error) as error:
         print("Error", error)
 
+print(prelog)
