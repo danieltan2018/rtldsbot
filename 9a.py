@@ -1,5 +1,9 @@
 import re
 from collections import OrderedDict
+# Dependency: pip install psycopg2-binary
+import psycopg2
+# Ensure secret.py exists
+from secret import dbuser, dbpass, dbhost, dbport, dbdata
 
 logname = 'English Service'
 logsearch = 'live/live.m3u8?'
@@ -29,8 +33,8 @@ with open('/var/log/nginx/access.log', 'r') as logfile:
                 ip = lineparts[finder+2]
                 if ip not in ipmap:
                     ipcount += 1
-                    ipmap[ip] = ipcount
-                email = 'User_' + str(ipmap[ip])
+                    ipmap[ip] = 'User_' + str(ipcount)
+                email = ipmap[ip]
                 logstore[timestamp].add(email)
 
 
@@ -61,3 +65,20 @@ for item in firstseen:
         prelog += firstseen[item] + '-' + lastseen[item] + '\n'
 
 print(prelog)
+
+for ip in ipmap:
+    try:
+        connection = psycopg2.connect(user=dbuser,
+                                      password=dbpass,
+                                      host=dbhost,
+                                      port=dbport,
+                                      database=dbdata)
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = %s)", (ip,))
+        assoc = cursor.fetchall()
+        print(ipmap[ip], end=' ')
+        print(assoc)
+    except (Exception, psycopg2.Error) as error:
+        pass
+
