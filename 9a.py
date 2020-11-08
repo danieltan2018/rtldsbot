@@ -66,14 +66,16 @@ for item in firstseen:
 
 prelog += '\n'
 
-for ip in ipmap:
-    try:
-        connection = psycopg2.connect(user=dbuser,
-                                      password=dbpass,
-                                      host=dbhost,
-                                      port=dbport,
-                                      database=dbdata)
-        cursor = connection.cursor()
+holdingarea = []
+
+try:
+    connection = psycopg2.connect(user=dbuser,
+                                  password=dbpass,
+                                  host=dbhost,
+                                  port=dbport,
+                                  database=dbdata)
+    cursor = connection.cursor()
+    for ip in ipmap:
         cursor.execute(
             "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = %s", (ip,))
         assoc = cursor.fetchall()
@@ -81,7 +83,12 @@ for ip in ipmap:
             prelog += ipmap[ip] + ' accounts:\n'
             for item in assoc:
                 prelog += item[0] + '\n'
-    except (Exception, psycopg2.Error) as error:
-        print("Error", error)
+        else:
+            holdingarea.append(ipmap[ip])
+    prelog += '\nNo associated accounts:\n'
+    for item in holdingarea:
+        prelog += item + '\n'
+except (Exception, psycopg2.Error) as error:
+    print("Error", error)
 
 print(prelog)
