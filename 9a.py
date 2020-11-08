@@ -80,5 +80,5 @@ for ip in ipmap:
         print(ipmap[ip], end=' ')
         print(assoc)
     except (Exception, psycopg2.Error) as error:
-        pass
+        print("Error", error)
 
