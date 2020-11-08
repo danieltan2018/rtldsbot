@@ -77,7 +77,9 @@ for ip in ipmap:
         cursor.execute(
             "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = %s", (ip,))
         assoc = cursor.fetchall()
-        prelog += ipmap[ip] + ' = ' + ', '.join(assoc) + '\n'
+        prelog += ipmap[ip] + ' accounts:\n'
+        for item in assoc:
+            prelog += item[0] + '\n'
     except (Exception, psycopg2.Error) as error:
         print("Error", error)
 
