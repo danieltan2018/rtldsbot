@@ -6,7 +6,7 @@ from telegram.ext import (Updater, CommandHandler,
 from telegram.ext.dispatcher import run_async
 # Dependency: pip install flask
 from flask import Flask, request, jsonify
-import schedule
+
 import subprocess
 import re
 from collections import OrderedDict
@@ -30,12 +30,6 @@ def admin(update, context):
         [InlineKeyboardButton(
             "Recording Viewer Count", callback_data='latestcount')],
         [InlineKeyboardButton(
-            "Start Stream (Recording)", callback_data='stream1')],
-        [InlineKeyboardButton(
-            "Stop Stream (Recording)", callback_data='kill1')],
-        [InlineKeyboardButton(
-            "Download Recording", callback_data='download')],
-        [InlineKeyboardButton(
             "Login IP Report", callback_data='doipwarn')],
         [InlineKeyboardButton(
             "Sync Loty Database", callback_data='syncloty')],
@@ -47,66 +41,22 @@ def admin(update, context):
         chat_id=group, reply_markup=reply_markup, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-@run_async
-def stream1():
-    global kill1confirm
-    kill1confirm = 0
-    global process1
-    bot.send_message(chat_id=group,
-                     text='_Starting stream from file..._', parse_mode=telegram.ParseMode.MARKDOWN)
-    process1 = subprocess.Popen(['ffmpeg', '-re', '-i', 'svc.mp4', '-c', 'copy', '-f', 'flv', rtmp1],
-                                stderr=subprocess.PIPE, universal_newlines=True)
-    monitor = True
-    while True:
-        output = process1.stderr.readline()
-        if output == '' and process1.poll() is not None:
-            break
-        if output:
-            if monitor and 'speed=' in output:
-                bot.send_message(chat_id=group, text='*Playback Started*',
-                                 parse_mode=telegram.ParseMode.MARKDOWN)
-                monitor = False
-    bot.send_message(chat_id=group, text='*Playback Stopped*',
-                     parse_mode=telegram.ParseMode.MARKDOWN)
-    del kill1confirm
-    return
+def sender(finallog):
+    logsender = finallog.split('\n')
+    linecounter = 0
+    compose = ''
+    for line in logsender:
+        compose += line + '\n'
+        linecounter += 1
+        if linecounter == 50:
+            bot.send_message(
+                chat_id=group, text=compose)
+            time.sleep(1)
+            linecounter = 0
+            compose = ''
+    bot.send_message(chat_id=group, text=compose)
 
 
-@run_async
-def kill1():
-    try:
-        global kill1confirm
-        kill1confirm += 1
-    except:
-        bot.send_message(chat_id=group, text='_Unable to stop: stream is not running._',
-                         parse_mode=telegram.ParseMode.MARKDOWN)
-        return
-    if kill1confirm % 2 == 0:
-        global process1
-        bot.send_message(chat_id=group, text='_Stopping stream..._',
-                         parse_mode=telegram.ParseMode.MARKDOWN)
-        process1.kill()
-        process1.wait()
-    else:
-        bot.send_message(chat_id=group,
-                         text='_Please press Stop Stream again to confirm._', parse_mode=telegram.ParseMode.MARKDOWN)
-    return
-
-
-@run_async
-def download():
-    process = subprocess.Popen(
-        ['aws', 's3', 'cp', svcfile, './'], stdout=subprocess.PIPE, universal_newlines=True)
-    bot.send_message(chat_id=group, text='_Downloading svc file..._',
-                     parse_mode=telegram.ParseMode.MARKDOWN)
-    for output in process.stdout.readlines():
-        if 'download:' in output:
-            bot.send_message(chat_id=group, text='*Download Complete*',
-                             parse_mode=telegram.ParseMode.MARKDOWN)
-    return
-
-
-@run_async
 def log():
     logname = 'English Service'
     logsearch = 'live/live.m3u8?'
@@ -123,6 +73,8 @@ def log():
 
     with open('/var/log/nginx/access.log', 'r') as logfile:
         for line in logfile:
+            if '9a@lifertl.com' in line:
+                continue
             line = line.strip()
             timestamp = timestamp_regex.search(line).group()
             timestamp = timestamp.strip('[+')
@@ -206,22 +158,98 @@ def log():
     finallog = prelog
     finallog += '\nLast log entry at ' + timestamp
 
-    logsender = finallog.split('\n')
-    linecounter = 0
-    compose = ''
-    for line in logsender:
-        compose += line + '\n'
-        linecounter += 1
-        if linecounter == 50:
-            bot.send_message(
-                chat_id=group, text=compose)
-            time.sleep(1)
-            linecounter = 0
-            compose = ''
-    bot.send_message(chat_id=group, text=compose)
+    sender(finallog)
+    log9a()
 
 
-@run_async
+def log9a():
+    logsearch = 'live/live.m3u8?'
+    timestamp_regex = re.compile('\[.*\+')
+    email_regex = re.compile('\?.*\sHTTP/')
+    logstore = OrderedDict()
+    firstseen = {}
+    lastseen = {}
+    ipmap = {}
+    ipcount = 0
+
+    with open('/var/log/nginx/access.log', 'r') as logfile:
+        for line in logfile:
+            line = line.strip()
+            timestamp = timestamp_regex.search(line).group()
+            timestamp = timestamp.strip('[+')
+            timestamp = timestamp[12:17]
+            if timestamp not in logstore:
+                logstore[timestamp] = set()
+            if logsearch in line:
+                email = email_regex.search(line).group()
+                email = email.strip('? ')
+                email = email.replace(' HTTP/', '')
+                if email == '9a@lifertl.com':
+                    lineparts = line.split('"')
+                    finder = lineparts.index('Amazon CloudFront')
+                    ip = lineparts[finder+2]
+                    if ip not in ipmap:
+                        ipcount += 1
+                        ipmap[ip] = 'User_' + str(ipcount)
+                    email = ipmap[ip]
+                    logstore[timestamp].add(email)
+
+    finallog = ''
+    viewers = set()
+    for timestamp, emailset in logstore.items():
+        for email in emailset:
+            if email not in viewers:
+                viewers.add(email)
+                finallog += timestamp + ' ' + email + ' PLAY\n'
+                if email not in firstseen:
+                    firstseen[email] = timestamp
+
+        currentviewers = viewers.copy()
+        for email in currentviewers:
+            if email not in emailset:
+                viewers.remove(email)
+                finallog += timestamp + ' ' + email + ' EXIT\n'
+                lastseen[email] = timestamp
+
+    prelog = '=== {} TOTAL 9A USERS ===\n'.format(ipcount)
+    for item in firstseen:
+        if item in viewers:
+            prelog += item + ' '
+            prelog += firstseen[item] + ' - ' + 'now' + '\n'
+        elif item in lastseen:
+            prelog += item + ' '
+            prelog += firstseen[item] + ' - ' + lastseen[item] + '\n'
+
+    prelog += '\n'
+
+    holdingarea = []
+
+    try:
+        connection = psycopg2.connect(user=dbuser,
+                                      password=dbpass,
+                                      host=dbhost,
+                                      port=dbport,
+                                      database=dbdata)
+        cursor = connection.cursor()
+        for ip in ipmap:
+            cursor.execute(
+                "SELECT DISTINCT email FROM users u, user_activities ua WHERE ua.user_id = u.id AND ip_address = %s", (ip,))
+            assoc = cursor.fetchall()
+            if assoc:
+                prelog += ipmap[ip] + ' accounts:\n'
+                for item in assoc:
+                    prelog += item[0] + '\n'
+            else:
+                holdingarea.append(ipmap[ip])
+        prelog += '\nNo associated accounts:\n'
+        for item in holdingarea:
+            prelog += item + '\n'
+    except (Exception, psycopg2.Error) as error:
+        print("Error", error)
+
+    sender(prelog)
+
+
 def latestcount():
     try:
         connection = psycopg2.connect(user=dbuser,
@@ -266,12 +294,6 @@ def callbackquery(update, context):
         full_name), parse_mode=telegram.ParseMode.MARKDOWN)
     if data == 'log':
         log()
-    elif data == 'stream1':
-        stream1()
-    elif data == 'kill1':
-        kill1()
-    elif data == 'download':
-        download()
     elif data == 'latestcount':
         latestcount()
     elif data == 'doipwarn':
@@ -342,17 +364,6 @@ def index():
         return '{"success":"true"}', 200
 
 
-@run_async
-def scheduler():
-    schedule.every().saturday.at("20:00").do(download)
-    schedule.every().sunday.at("07:47:30").do(stream1)
-    schedule.every().sunday.at("10:47:30").do(stream1)
-    print("Tasks scheduled.")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-
 def main():
     updater = Updater(token=bottoken, use_context=True)
     dp = updater.dispatcher
@@ -362,7 +373,6 @@ def main():
 
     updater.start_polling(1)
     print("Bot is running. Press Ctrl+C to stop.")
-    scheduler()
     webserver()
     updater.idle()
     print("Bot stopped successfully.")

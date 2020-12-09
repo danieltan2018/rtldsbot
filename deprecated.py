@@ -6,6 +6,8 @@ from telegram.ext import (Updater, CommandHandler,
 from telegram.ext.dispatcher import run_async
 # Dependency: pip install flask requests
 from flask import Flask, request, jsonify
+# Dependency: pip install schedule
+import schedule
 import subprocess
 import re
 from collections import OrderedDict
@@ -413,6 +415,76 @@ def bsmlogs(logname, category):
             connection.close()
 
 
+@run_async
+def stream1():
+    global kill1confirm
+    kill1confirm = 0
+    global process1
+    bot.send_message(chat_id=group,
+                     text='_Starting stream from file..._', parse_mode=telegram.ParseMode.MARKDOWN)
+    process1 = subprocess.Popen(['ffmpeg', '-re', '-i', 'svc.mp4', '-c', 'copy', '-f', 'flv', rtmp1],
+                                stderr=subprocess.PIPE, universal_newlines=True)
+    monitor = True
+    while True:
+        output = process1.stderr.readline()
+        if output == '' and process1.poll() is not None:
+            break
+        if output:
+            if monitor and 'speed=' in output:
+                bot.send_message(chat_id=group, text='*Playback Started*',
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
+                monitor = False
+    bot.send_message(chat_id=group, text='*Playback Stopped*',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    del kill1confirm
+    return
+
+
+@run_async
+def kill1():
+    try:
+        global kill1confirm
+        kill1confirm += 1
+    except:
+        bot.send_message(chat_id=group, text='_Unable to stop: stream is not running._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
+        return
+    if kill1confirm % 2 == 0:
+        global process1
+        bot.send_message(chat_id=group, text='_Stopping stream..._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
+        process1.kill()
+        process1.wait()
+    else:
+        bot.send_message(chat_id=group,
+                         text='_Please press Stop Stream again to confirm._', parse_mode=telegram.ParseMode.MARKDOWN)
+    return
+
+
+@run_async
+def download():
+    process = subprocess.Popen(
+        ['aws', 's3', 'cp', svcfile, './'], stdout=subprocess.PIPE, universal_newlines=True)
+    bot.send_message(chat_id=group, text='_Downloading svc file..._',
+                     parse_mode=telegram.ParseMode.MARKDOWN)
+    for output in process.stdout.readlines():
+        if 'download:' in output:
+            bot.send_message(chat_id=group, text='*Download Complete*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
+    return
+
+
+@run_async
+def scheduler():
+    schedule.every().saturday.at("20:00").do(download)
+    schedule.every().sunday.at("07:47:30").do(stream1)
+    schedule.every().sunday.at("10:47:30").do(stream1)
+    print("Tasks scheduled.")
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
 def main():
     updater = Updater(
         token=bottoken, use_context=True)
@@ -420,7 +492,7 @@ def main():
 
     dp.add_handler(CommandHandler("admin", admin))
     dp.add_handler(CallbackQueryHandler(callbackquery))
-
+    scheduler()
     webserver()
     updater.start_polling(1)
 
