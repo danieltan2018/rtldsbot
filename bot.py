@@ -159,7 +159,7 @@ def log():
     finallog += '\nLast log entry at ' + timestamp
 
     sender(finallog)
-    log9a()
+    # log9a()
 
 
 def log9a():
