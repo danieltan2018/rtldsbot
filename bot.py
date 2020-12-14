@@ -73,8 +73,8 @@ def log():
 
     with open('/var/log/nginx/access.log', 'r') as logfile:
         for line in logfile:
-            if '9a@lifertl.com' in line:
-                continue
+            # if '9a@lifertl.com' in line:
+            #     continue
             line = line.strip()
             timestamp = timestamp_regex.search(line).group()
             timestamp = timestamp.strip('[+')
@@ -151,13 +151,12 @@ def log():
     prelog += '=== IP WARNINGS ===\nMultiple IP addresses detected for the following users:\n'
     for key, value in ipwarnings.items():
         prelog += key + ': ' + str(value) + ' IPs\n'
-        for ipaddr in ipstore[key]:
-            prelog += ipaddr + '\n'
+        # for ipaddr in ipstore[key]:
+        #     prelog += ipaddr + '\n'
     prelog += '\n' + '=== FULL LOG DISABLED ===\n'
     # finallog = prelog + finallog
     finallog = prelog
     finallog += '\nLast log entry at ' + timestamp
-
     sender(finallog)
     # log9a()
 
