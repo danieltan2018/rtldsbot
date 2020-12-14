@@ -103,7 +103,7 @@ def log():
                 if timestamp != currtime:
                     currtime = timestamp
                     for email in ratecounter:
-                        if ratecounter[email] > 7:
+                        if ratecounter[email] > 30:
                             ratewarnings.add(email)
                     ratecounter = {}
                 else:
