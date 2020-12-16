@@ -9,7 +9,7 @@ bot = telegram.Bot(token=bottoken)
 
 
 def changecode():
-    bot.send_message(chat_id=group, text="_Changing password for 9a..._",
+    bot.send_message(chat_id=group, text="_Changing code for 9a..._",
                      parse_mode=telegram.ParseMode.MARKDOWN)
     code = secrets.token_hex(3).upper()
     olddir = "/var/www/html/" + os.listdir("/var/www/html")[0]
