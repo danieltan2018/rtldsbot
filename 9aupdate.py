@@ -18,7 +18,6 @@ def changecode():
     bot.send_message(chat_id=group, text=f"{link}{code}/")
 
 
-changecode()
 schedule.every().friday.at("00:00").do(changecode)
 
 while True:
