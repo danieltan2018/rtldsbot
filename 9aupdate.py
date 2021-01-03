@@ -16,8 +16,8 @@ def changecode():
         code = secrets.token_hex(4).upper()
     p = os.listdir("/var/www/html")
     for i in p:
-        if os.path.isdir(i):
-            olddir = "/var/www/html/" + i
+        olddir = "/var/www/html/" + i
+        if os.path.isdir(olddir):
             break
     newdir = "/var/www/html/" + code
     os.rename(olddir, newdir)
