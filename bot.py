@@ -44,8 +44,12 @@ def admin(update, context):
 
 
 def endstream():
+    bot.send_message(chat_id=group, text='_Finalising Stream..._',
+                         parse_mode=telegram.ParseMode.MARKDOWN)
     with open("/stream/live/live.m3u8", "a") as f:
         f.write("#EXT-X-ENDLIST")
+    bot.send_message(chat_id=group, text='*Stream Finalised*',
+                             parse_mode=telegram.ParseMode.MARKDOWN)
 
 def sender(finallog):
     logsender = finallog.split('\n')
