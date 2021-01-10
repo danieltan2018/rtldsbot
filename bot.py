@@ -34,12 +34,18 @@ def admin(update, context):
         [InlineKeyboardButton(
             "Sync Loty Database", callback_data='syncloty')],
         [InlineKeyboardButton(
-            "Sync Life Database", callback_data='synclife')]
+            "Sync Life Database", callback_data='synclife')],
+        [InlineKeyboardButton(
+            "Finalise Stream", callback_data='endstream')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     bot.send_message(
         chat_id=group, reply_markup=reply_markup, text=msg, parse_mode=telegram.ParseMode.MARKDOWN)
 
+
+def endstream():
+    with open("/stream/live/live.m3u8", "a") as f:
+        f.write("#EXT-X-ENDLIST")
 
 def sender(finallog):
     logsender = finallog.split('\n')
@@ -297,6 +303,8 @@ def callbackquery(update, context):
         latestcount()
     elif data == 'doipwarn':
         ipwarn.generate()
+    elif data == 'endstream':
+        endstream()
     elif data == 'syncloty':
         bot.send_message(chat_id=group, text='_Syncing Loty Database..._',
                          parse_mode=telegram.ParseMode.MARKDOWN)
