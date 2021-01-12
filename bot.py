@@ -268,7 +268,7 @@ def latestcount():
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        cursor.execute("SELECT id, date FROM events WHERE category_id=55")
+        cursor.execute("SELECT id, date FROM events WHERE category_id=91")
         services = cursor.fetchall()
         compose = 'WORSHIP SERVICES\n\n'
         for data in services:
