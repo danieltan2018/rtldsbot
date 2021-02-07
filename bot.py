@@ -1,20 +1,15 @@
-# Dependency: pip install python-telegram-bot --upgrade
 import telegram.bot
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (Updater, CommandHandler,
                           Filters, CallbackQueryHandler)
 from telegram.ext.dispatcher import run_async
-# Dependency: pip install flask
 from flask import Flask, request, jsonify
-
 import subprocess
 import re
 from collections import OrderedDict
 import time
 from datetime import datetime
-# Dependency: pip install psycopg2-binary
 import psycopg2
-# Ensure secret.py exists
 from secret import rtmp1, svcfile, group, bottoken, dbuser, dbpass, dbhost, dbport, dbdata
 import gsheetsync
 import ipwarn
