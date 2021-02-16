@@ -24,7 +24,7 @@ def changecode():
     bot.send_message(chat_id=group, text=f"{link}{code}/")
 
 
-schedule.every().monday.at("00:01").do(changecode)
+schedule.every().tuesday.at("00:00").do(changecode)
 
 while True:
     schedule.run_pending()
