@@ -349,6 +349,7 @@ def index():
             compose += '<b>Notification Type: </b>' + x['notificationType'] + '\n'
         except:
             print(x)
+            return '{"success":"true"}', 200
         for y in x['mail']['commonHeaders']['to']:
             compose += '<b>To: </b>' + y + '\n'
         compose += '<b>Subject: </b>' + x['mail']['commonHeaders']['subject']
