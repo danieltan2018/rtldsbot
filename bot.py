@@ -345,7 +345,10 @@ def index():
         x = request.get_json(force=True)
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
-        compose += '<b>Notification Type: </b>' + x['notificationType'] + '\n'
+        try:
+            compose += '<b>Notification Type: </b>' + x['notificationType'] + '\n'
+        except:
+            print(x)
         for y in x['mail']['commonHeaders']['to']:
             compose += '<b>To: </b>' + y + '\n'
         compose += '<b>Subject: </b>' + x['mail']['commonHeaders']['subject']
