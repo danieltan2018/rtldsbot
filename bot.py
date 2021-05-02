@@ -269,7 +269,7 @@ def viewcounter(id, name):
                                       database=dbdata)
         cursor = connection.cursor()
         cursor.execute(
-            f"SELECT id, name, date FROM events WHERE category_id={id}")
+            f"SELECT id, name, date FROM events WHERE category_id={id} ORDER BY date")
         services = cursor.fetchall()
         compose = f'{name}\n\n'
         for data in services:
