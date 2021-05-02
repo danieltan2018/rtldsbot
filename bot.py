@@ -256,6 +256,11 @@ def log9a():
 
 
 def latestcount():
+    viewcounter(91, "WORSHIP SERVICES")
+    viewcounter(92, "ADULT SUNDAY SCHOOL")
+
+
+def viewcounter(id, name):
     try:
         connection = psycopg2.connect(user=dbuser,
                                       password=dbpass,
@@ -263,9 +268,9 @@ def latestcount():
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        cursor.execute("SELECT id, date FROM events WHERE category_id=91")
+        cursor.execute(f"SELECT id, date FROM events WHERE category_id={id}")
         services = cursor.fetchall()
-        compose = 'WORSHIP SERVICES\n\n'
+        compose = f'{name}\n\n'
         for data in services:
             i = data[0]
             date = data[1].strftime('%d %b')
@@ -346,7 +351,8 @@ def index():
         compose = ''
         compose += '<u>AWS Simple Email Service</u>\n'
         try:
-            compose += '<b>Notification Type: </b>' + x['notificationType'] + '\n'
+            compose += '<b>Notification Type: </b>' + \
+                x['notificationType'] + '\n'
         except:
             print(x)
             return '{"success":"true"}', 200
