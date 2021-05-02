@@ -268,19 +268,22 @@ def viewcounter(id, name):
                                       port=dbport,
                                       database=dbdata)
         cursor = connection.cursor()
-        cursor.execute(f"SELECT id, date FROM events WHERE category_id={id}")
+        cursor.execute(
+            f"SELECT id, name, date FROM events WHERE category_id={id}")
         services = cursor.fetchall()
         compose = f'{name}\n\n'
         for data in services:
             i = data[0]
-            date = data[1].strftime('%d %b')
+            name = data[1]
+            if name == "Sunday Worship Service":
+                name = data[2].strftime('%d %b')
             cursor.execute(
                 "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
             eventclicks = cursor.fetchone()[0]
             cursor.execute(
                 "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
             eventviews = cursor.fetchone()[0]
-            compose += "{}: *{} views ({} users)*\n".format(date,
+            compose += "{}: *{} views ({} users)*\n".format(name,
                                                             eventviews, eventclicks)
         bot.send_message(chat_id=group, text=compose,
                          parse_mode=telegram.ParseMode.MARKDOWN)
