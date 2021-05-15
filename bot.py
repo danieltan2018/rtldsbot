@@ -389,7 +389,7 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("admin", admin))
-    dp.add_handler(CallbackQueryHandler(callbackquery))
+    dp.add_handler(CallbackQueryHandler(callbackquery, run_async=True))
 
     updater.start_polling(1)
     print("Bot is running. Press Ctrl+C to stop.")

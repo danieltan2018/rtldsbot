@@ -67,9 +67,9 @@ class EventGroup(Base):
     location = Column(String)
     start_date = Column(String)
     end_date = Column(String)
-    thumbnail_url = Column(String, default='')
+    thumbnail_url = Column(String, default=None)
     event_type_id = Column(Integer, nullable=False)
-    details = Column(String, default='')
+    details = Column(String, default=None)
 
     def __init__(self, id, name, location, start_date, end_date, thumbnail_url, event_type_id, details):
         self.id = id
@@ -89,7 +89,7 @@ class Category(Base):
     name = Column(String, nullable=False)
     date = Column(String)
     event_group_id = Column(Integer, nullable=False)
-    thumbnail_url = Column(String, default='')
+    thumbnail_url = Column(String, default=None)
 
     def __init__(self, id, name, date, event_group_id, thumbnail_url):
         self.id = id
@@ -107,8 +107,8 @@ class Event(Base):
     date = Column(String)
     category_id = Column(Integer, nullable=False)
     author_id = Column(Integer)
-    scripture_reference = Column(String, default='')
-    details = Column(String, default='')
+    scripture_reference = Column(String, default=None)
+    details = Column(String, default=None)
 
     def __init__(self, id, name, date, category_id, author_id, scripture_reference, details):
         self.id = id
@@ -124,14 +124,14 @@ class MediaEntry(Base):
     __tablename__ = 'media_entries'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String, default='')
-    thumbnail_url = Column(String, default='')
+    title = Column(String, default=None)
+    thumbnail_url = Column(String, default=None)
     original_filename = Column(String, nullable=False)
     encrypted_filename = Column(String, nullable=False)
     date = Column(String)
     event_id = Column(Integer, nullable=False)
     bucket_id = Column(Integer, nullable=False)
-    details = Column(String, default='')
+    details = Column(String, default=None)
     media_type_id = Column(Integer, nullable=False)
     author_id = Column(Integer)
     index = Column(Integer)
@@ -243,9 +243,9 @@ def sync(server):
         scripture_reference = None
         author_id = None
         if len(row) > 9:
-            details = row[9]
+            details = row[9] or None
         if len(row) > 8:
-            scripture_reference = row[8]
+            scripture_reference = row[8] or None
         if len(row) > 7:
             author_id = row[7] or None
         data = {"id": row[0], "name": row[4], "date": row[5] or None, "category_id": row[6],
