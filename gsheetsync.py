@@ -236,7 +236,7 @@ def sync(server):
         session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                range='events!A2:J').execute()
+                                range='events!A1093:J').execute()
     values = result.get('values', [])
     for row in values:
         details = None
@@ -254,7 +254,7 @@ def sync(server):
         session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                range='media_entries!A2:P').execute()
+                                range='media_entries!A4826:P').execute()
     values = result.get('values', [])
     for row in values:
         if row[15] == 't':
