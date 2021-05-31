@@ -275,7 +275,7 @@ def viewcounter(id, name):
         for data in services:
             i = data[0]
             name = data[1]
-            if name == "Sunday Worship Service":
+            if 'Service' in name:
                 name = data[2].strftime('%d %b')
             cursor.execute(
                 "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
