@@ -283,8 +283,9 @@ def viewcounter(id, name):
             cursor.execute(
                 "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE id > 59170 AND path='/api/content/event/%s/mediaentrylist') AS x", (i,))
             eventviews = cursor.fetchone()[0]
-            compose += "{}: *{} views ({} users)*\n".format(name,
-                                                            eventviews, eventclicks)
+            if int(eventclicks) > 0:
+                compose += "{}: *{} views ({} users)*\n".format(name,
+                                                                eventviews, eventclicks)
         bot.send_message(chat_id=group, text=compose,
                          parse_mode=telegram.ParseMode.MARKDOWN)
 
