@@ -258,10 +258,6 @@ def log9a():
 def latestcount():
     viewcounter(91, "WORSHIP SERVICES")
     viewcounter(92, "ADULT SUNDAY SCHOOL")
-    viewcounter(94, "GAF Medical Seminar 2021 (Messages)")
-    viewcounter(95, "GAF Medical Seminar 2021 (Videos)")
-    viewcounter(97, "Family Seminar 2021 (Messages)")
-    viewcounter(98, "Family Seminar 2021 (Videos)")
 
 
 def viewcounter(id, name):
