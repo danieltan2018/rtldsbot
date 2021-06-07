@@ -278,10 +278,10 @@ def viewcounter(id, name):
             if 'Service' in name:
                 name = data[2].strftime('%d %b')
             cursor.execute(
-                "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+                "SELECT COUNT(*) FROM(SELECT DISTINCT user_id FROM user_activities WHERE id > 59170 AND path='/api/content/event/%s/mediaentrylist') AS x", (i,))
             eventclicks = cursor.fetchone()[0]
             cursor.execute(
-                "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE path='/api/content/event/%s/mediaentrylist') AS x", (i,))
+                "SELECT COUNT(*) FROM(SELECT user_id FROM user_activities WHERE id > 59170 AND path='/api/content/event/%s/mediaentrylist') AS x", (i,))
             eventviews = cursor.fetchone()[0]
             compose += "{}: *{} views ({} users)*\n".format(name,
                                                             eventviews, eventclicks)
