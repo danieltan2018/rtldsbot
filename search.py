@@ -13,10 +13,11 @@ EVENTSDB = []
 
 @app.route('/search/<query>', methods=['GET'])
 def search(query):
+    query = query.lower().trim()
     results = []
     limit = 10
     for event in EVENTSDB:
-        if query in event["title"]:
+        if query in event["title"].lower():
             results.append(event)
             if len(results) == limit:
                 break
