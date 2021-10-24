@@ -13,7 +13,7 @@ EVENTSDB = []
 
 @app.route('/search/<query>', methods=['GET'])
 def search(query):
-    query = query.lower().trim()
+    query = query.lower().strip()
     results = []
     limit = 10
     for event in EVENTSDB:
