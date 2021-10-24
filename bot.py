@@ -304,8 +304,7 @@ def callbackquery(update, context):
     first_name = query.from_user.first_name
     last_name = query.from_user.last_name
     full_name = (str(first_name or '') + ' ' + str(last_name or '')).strip()
-    bot.send_message(chat_id=group, text='`Bot is responding to command by {}`'.format(
-        full_name), parse_mode=telegram.ParseMode.MARKDOWN)
+    # bot.send_message(chat_id=group, text='`Bot is responding to command by {}`'.format(full_name), parse_mode=telegram.ParseMode.MARKDOWN)
     if data == 'log':
         log()
     elif data == 'latestcount':
@@ -315,6 +314,8 @@ def callbackquery(update, context):
     elif data == 'endstream':
         endstream()
     elif data == 'syncloty':
+        gsheetsync.sync('lotydb')
+        return
         bot.send_message(chat_id=group, text='_Syncing Loty Database..._',
                          parse_mode=telegram.ParseMode.MARKDOWN)
         try:

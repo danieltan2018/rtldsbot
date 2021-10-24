@@ -251,7 +251,7 @@ def sync(server):
         data = {"id": row[0], "name": row[4], "date": row[5] or None, "category_id": row[6],
                 "author_id": author_id, "scripture_reference": scripture_reference, "details": details}
         session.merge(Event(**data))
-        session.commit()
+    print(session.commit())
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='media_entries!A4839:P').execute()
