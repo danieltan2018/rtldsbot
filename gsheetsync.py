@@ -188,7 +188,7 @@ def sync(server):
     for row in values:
         data = {"id": row[0], "name": row[4], "details": None}
         session.merge(Author(**data))
-        session.commit()
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='buckets!A2:E').execute()
@@ -196,7 +196,7 @@ def sync(server):
     for row in values:
         data = {"id": row[0], "url": row[4]}
         session.merge(Bucket(**data))
-        session.commit()
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='media_types!A2:E').execute()
@@ -204,7 +204,7 @@ def sync(server):
     for row in values:
         data = {"id": row[0], "name": row[4]}
         session.merge(MediaType(**data))
-        session.commit()
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='event_types!A2:E').execute()
@@ -212,7 +212,7 @@ def sync(server):
     for row in values:
         data = {"id": row[0], "name": row[4]}
         session.merge(EventType(**data))
-        session.commit()
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='event_groups!A2:K').execute()
@@ -221,7 +221,7 @@ def sync(server):
         data = {"id": row[0], "name": row[4], "location": row[5], "start_date": row[6],
                 "end_date": row[7], "thumbnail_url": row[8], "event_type_id": row[9], "details": None}
         session.merge(EventGroup(**data))
-        session.commit()
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='categories!A2:H').execute()
@@ -233,7 +233,7 @@ def sync(server):
         data = {"id": row[0], "name": row[4], "date": row[5] or None,
                 "event_group_id": row[6], "thumbnail_url": thumbnail_url}
         session.merge(Category(**data))
-        session.commit()
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='events!A1095:J').execute()
@@ -250,8 +250,10 @@ def sync(server):
             author_id = row[7] or None
         data = {"id": row[0], "name": row[4], "date": row[5] or None, "category_id": row[6],
                 "author_id": author_id, "scripture_reference": scripture_reference, "details": details}
-        session.merge(Event(**data))
-    print(session.commit())
+        data = Event(**data)
+        newdata = session.merge(data)
+        print(data == newdata)
+    session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
                                 range='media_entries!A4839:P').execute()
@@ -264,4 +266,4 @@ def sync(server):
         data = {"id": row[0], "title": row[4], "thumbnail_url": row[5], "original_filename": row[6], "encrypted_filename": row[7], "date": row[8] or None, "event_id": row[9],
                 "bucket_id": row[10], "details": row[11], "media_type_id": row[12], "author_id": row[13] or None, "index": row[14] or None, "downloadable": download}
         session.merge(MediaEntry(**data))
-        session.commit()
+    session.commit()
