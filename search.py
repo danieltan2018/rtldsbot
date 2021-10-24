@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import psycopg2
 import threading
 import time
@@ -7,6 +8,7 @@ from secret import dbuser, dbpass, dbhost, dbport, dbdata
 
 
 app = Flask(__name__)
+cors = CORS(app)
 
 EVENTSDB = []
 
