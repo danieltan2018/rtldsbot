@@ -221,6 +221,8 @@ def sync(server):
         data = {"id": row[0], "name": row[4], "location": row[5], "start_date": row[6],
                 "end_date": row[7], "thumbnail_url": row[8], "event_type_id": row[9], "details": None}
         session.merge(EventGroup(**data))
+    print(session.new)
+    print(session.dirty)
     session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
