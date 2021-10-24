@@ -36,19 +36,23 @@ def refreshdb():
                                       database=dbdata)
         cursor = connection.cursor()
         cursor.execute(
-            "SELECT e.name, scripture_reference, a.name, category_id, e.id FROM events e LEFT OUTER JOIN authors a ON e.author_id = a.id WHERE category_id <> 57 ORDER BY e.id DESC")
+            "SELECT e.name, scripture_reference, a.name, c.id, e.id, CONCAT_WS(' » ', et.name, eg.name, c.name) FROM events e LEFT OUTER JOIN categories c ON e.category_id = c.id LEFT OUTER JOIN event_groups eg ON c.event_group_id = eg.id LEFT OUTER JOIN event_types et ON eg.event_type_id = et.id LEFT OUTER JOIN authors a ON e.author_id = a.id WHERE category_id <> 57 ORDER BY e.id DESC")
         events = cursor.fetchall()
         EVENTSDB.clear()
         for event in events:
-            title = event[0]
+            title = str(event[0])
             if event[1]:
                 title += f" ({event[1]})"
-            author = event[2]
+            author = str(event[2])
             url = f"/category/messagelist/{event[3]}/{event[4]}"
+            id = str(event[4])
+            breadcrumbs = str(event[5])
             item = {
+                "id": id,
                 "title": title,
                 "author": author,
-                "url": url
+                "url": url,
+                "breadcrumbs": breadcrumbs
             }
             EVENTSDB.append(item)
 
