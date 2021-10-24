@@ -236,7 +236,7 @@ def sync(server):
         session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                range='events!A2:J').execute()
+                                range='events!A1095:J').execute()
     values = result.get('values', [])
     for row in values:
         details = None
@@ -250,11 +250,11 @@ def sync(server):
             author_id = row[7] or None
         data = {"id": row[0], "name": row[4], "date": row[5] or None, "category_id": row[6],
                 "author_id": author_id, "scripture_reference": scripture_reference, "details": details}
-        print(session.merge(Event(**data)))
-        print(session.commit())
+        session.merge(Event(**data))
+        session.commit()
 
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                range='media_entries!A2:P').execute()
+                                range='media_entries!A4839:P').execute()
     values = result.get('values', [])
     for row in values:
         if row[15] == 't':
