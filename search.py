@@ -14,9 +14,12 @@ EVENTSDB = []
 @app.route('/search/<query>', methods=['GET'])
 def search(query):
     results = []
+    limit = 10
     for event in EVENTSDB:
         if query in event["title"]:
             results.append(event)
+            if len(results) == limit:
+                break
     return jsonify(results)
 
 
