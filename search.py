@@ -38,7 +38,9 @@ def refreshdb():
         events = cursor.fetchall()
         EVENTSDB.clear()
         for event in events:
-            title = f"{event[0]} ({event[1]})"
+            title = event[0]
+            if event[1]:
+                title += f" ({event[1]})"
             author = event[2]
             url = f"/category/messagelist/{event[3]}/{event[4]}"
             item = {
