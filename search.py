@@ -17,7 +17,7 @@ EVENTSDB = []
 def search(query):
     query = query.lower().strip()
     results = []
-    limit = 10
+    limit = 20
     for event in EVENTSDB:
         if query in event["title"].lower():
             results.append(event)
