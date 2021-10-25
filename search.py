@@ -19,7 +19,7 @@ def search(query):
     results = []
     limit = 20
     for event in EVENTSDB:
-        if query in event["title"].lower() or query in event["author"].lower():
+        if query in event["searchkey"]:
             results.append(event)
             if len(results) == limit:
                 break
@@ -47,12 +47,14 @@ def refreshdb():
             url = f"/category/messagelist/{event[3]}/{event[4]}"
             id = event[4] or ""
             breadcrumbs = event[5] or ""
+            searchkey = title.lower() + " " + author.lower()
             item = {
                 "id": id,
                 "title": title,
                 "author": author,
                 "url": url,
-                "breadcrumbs": breadcrumbs
+                "breadcrumbs": breadcrumbs,
+                "searchkey": searchkey
             }
             EVENTSDB.append(item)
 
