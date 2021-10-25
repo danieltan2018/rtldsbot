@@ -19,7 +19,7 @@ def search(query):
     results = []
     limit = 20
     for event in EVENTSDB:
-        if query in event["title"].lower():
+        if query in event["title"].lower() or query in event["author"].lower():
             results.append(event)
             if len(results) == limit:
                 break
