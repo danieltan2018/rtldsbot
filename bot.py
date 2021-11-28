@@ -315,7 +315,7 @@ def callbackquery(update, context):
     elif data == 'endstream':
         endstream()
     elif data == 'syncloty':
-        bot.send_message(chat_id=group, text='_MANUAL OVERRIDE: Full Database Sync (Loty)..._',
+        bot.send_message(chat_id=group, text='_Syncing Loty Database..._',
                          parse_mode=telegram.ParseMode.MARKDOWN)
         try:
             gsheetsync.sync('lotydb')
@@ -325,7 +325,7 @@ def callbackquery(update, context):
             bot.send_message(chat_id=group, text='*Failed with error: *{}'.format(e),
                              parse_mode=telegram.ParseMode.MARKDOWN)
     elif data == 'synclife':
-        bot.send_message(chat_id=group, text='_MANUAL OVERRIDE: Full Database Sync (Life)..._',
+        bot.send_message(chat_id=group, text='_Syncing Life Database..._',
                          parse_mode=telegram.ParseMode.MARKDOWN)
         try:
             gsheetsync.sync('lifedb')
