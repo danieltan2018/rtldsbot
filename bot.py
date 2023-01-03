@@ -256,8 +256,7 @@ def log9a():
 
 
 def latestcount():
-    viewcounter(105, "WORSHIP SVC 2022")
-    viewcounter(115, "ADSS 2022")
+    viewcounter(129, "WORSHIP SVC 2023")
 
 
 def viewcounter(id, name):
