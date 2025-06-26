@@ -16,7 +16,7 @@ def generate():
                                   port=dbport,
                                   database=dbdata)
     cursor = connection.cursor()
-    cursor.execute("SELECT DISTINCT user_id, preferred_name, ip_address, user_agent FROM user_activities ua, users WHERE ua.created_at > NOW() - '1 week'::INTERVAL AND path = '/api/user/login' AND users.id = user_id ORDER BY user_id;")
+    cursor.execute("SELECT DISTINCT user_id, preferred_name, ip_address, user_agent FROM user_activities ua, users WHERE ua.created_at > NOW() - '2 weeks'::INTERVAL AND path = '/api/user/login' AND users.id = user_id ORDER BY user_id;")
     rows = cursor.fetchall()
     cursor.close()
     connection.close()
